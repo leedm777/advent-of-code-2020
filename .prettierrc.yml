@@ -1,0 +1,6 @@
+---
+# prose wrap helps formatting Markdown and YAML
+proseWrap: always
+# vim-prettier has its own defaults, so we need to reset anything that doesn't match
+trailingComma: es5
+arrowParens: always
