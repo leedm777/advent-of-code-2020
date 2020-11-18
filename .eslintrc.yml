@@ -8,11 +8,21 @@ extends:
   - plugin:jest/recommended
   - plugin:eslint-comments/recommended
 plugins:
+  - "@typescript-eslint"
+  - eslint-plugin-tsdoc
   - standard
   - prettier
   - eslint-comments
   # TODO: jest, import, node
+overrides:
+  - files: ["*.ts", "*.tsx"]
+    extends:
+      - "plugin:@typescript-eslint/eslint-recommended"
+      - "plugin:@typescript-eslint/recommended"
+      - "plugin:@typescript-eslint/recommended"
 rules:
   prettier/prettier: error
+  tsdoc/syntax: error
 env:
   node: true
+parser: "@typescript-eslint/parser"
