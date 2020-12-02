@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { sscanf } from "scanf";
 
 /**
  * To try to debug the problem, they have created a list (your puzzle input) of
@@ -26,9 +27,12 @@ import _ from "lodash";
 export function part1(input: string[]): number {
   return _(input)
     .map((line) => {
-      const [policy, password] = _.split(line, ": ");
-      const [range, char] = _.split(policy, " ");
-      const [min, max] = _.split(range, "-").map((s) => parseInt(s, 10));
+      const [min, max, char, password] = sscanf(line, "%d-%d %s: %s") as [
+        number,
+        number,
+        string,
+        string
+      ];
       return { min, max, char, password };
     })
     .filter(({ min, max, char, password }) => {
@@ -48,9 +52,12 @@ export function part1(input: string[]): number {
 export function part2(input: string[]): number {
   return _(input)
     .map((line) => {
-      const [policy, password] = _.split(line, ": ");
-      const [range, char] = _.split(policy, " ");
-      const [pos1, pos2] = _.split(range, "-").map((s) => parseInt(s, 10));
+      const [pos1, pos2, char, password] = sscanf(line, "%d-%d %s: %s") as [
+        number,
+        number,
+        string,
+        string
+      ];
       return { pos1, pos2, char, password };
     })
     .filter(({ pos1, pos2, char, password }) => {
