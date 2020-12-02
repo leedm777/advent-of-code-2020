@@ -7,6 +7,10 @@ import _ from "lodash";
  * @returns parsed numbers
  */
 export function splitNumbers(str: string): number[] {
+  str = _.trim(str);
+  if (str === "") {
+    return [];
+  }
   return _(str)
     .split(/\s+/)
     .map((s) => parseInt(s, 10))
