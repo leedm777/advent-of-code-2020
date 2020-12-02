@@ -13,3 +13,8 @@ eslint:
 tsc:
 	npx --no-install tsc --noEmit
 .PHONY: tsc
+
+test:
+	npx jest
+	$(MAKE) lint
+.PHONY: test
