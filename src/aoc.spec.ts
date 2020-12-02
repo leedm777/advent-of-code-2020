@@ -1,4 +1,4 @@
-import { splitNumbers } from "./aoc";
+import { splitLines, splitNumbers } from "./aoc";
 
 describe("aoc helper functions", () => {
   describe("splitNumbers", () => {
@@ -12,6 +12,22 @@ describe("aoc helper functions", () => {
     describe("given empty file", () => {
       it("should return empty array", async () => {
         const actual = splitNumbers("");
+        expect(actual).toStrictEqual([]);
+      });
+    });
+  });
+
+  describe("splitLines", () => {
+    describe("given some lines", () => {
+      it("should split them into an array", async () => {
+        const actual = splitLines("line 1\nline 2");
+        expect(actual).toStrictEqual(["line 1", "line 2"]);
+      });
+    });
+
+    describe("given empty input", () => {
+      it("should return empty array", async () => {
+        const actual = splitLines("");
         expect(actual).toStrictEqual([]);
       });
     });
