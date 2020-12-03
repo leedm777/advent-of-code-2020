@@ -1,4 +1,5 @@
-import { splitLines, splitNumbers } from "./aoc";
+import _ from "lodash";
+import { MinHeap, splitLines, splitNumbers } from "./aoc";
 
 describe("aoc helper functions", () => {
   describe("splitNumbers", () => {
@@ -29,6 +30,27 @@ describe("aoc helper functions", () => {
       it("should return empty array", async () => {
         const actual = splitLines("");
         expect(actual).toStrictEqual([]);
+      });
+    });
+  });
+
+  describe("MinHeap", () => {
+    let uut: MinHeap<number>;
+    beforeEach(() => {
+      uut = new MinHeap();
+    });
+
+    describe("given some data", () => {
+      it("should extract it in priorty order", async () => {
+        const max = 100;
+        _(_.range(1, max))
+          .shuffle()
+          .forEach((n) => uut.insert(n, n));
+
+        _.range(1, max).forEach((n) => {
+          const actual = uut.extract();
+          expect(actual).toStrictEqual(n);
+        });
       });
     });
   });
