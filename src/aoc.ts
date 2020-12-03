@@ -124,45 +124,117 @@ export interface Position {
   is(other: Position): boolean;
 }
 
-export interface Graph {
-  getNeighbors(p: Position): Position[];
+export interface Graph<T extends Position> {
+  getNeighbors(p: T): T[];
 
-  getDistance(start: Position, neighbor: Position): number;
+  getNeighborDistance(start: T, neighbor: T): number;
 }
+
+export class XYPosition implements Position {
+  x: number;
+  y: number;
+
+  constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
+
+  is(other: XYPosition): boolean {
+    return this.x === other.x && this.y === other.y;
+  }
+
+  toString(): string {
+    return `[ ${this.x}, ${this.y} ]`;
+  }
+}
+
+/**
+ * Shorthand for creating XYPositions. No idea if the memoize helps or not.
+ */
+export const xy = _.memoize(
+  (x, y) => new XYPosition(x, y),
+  (x, y) => `${x},${y}`
+);
+
+const moves = [
+  [1, 0],
+  [-1, 0],
+  [0, 1],
+  [0, -1],
+];
+
+export class TextGraph implements Graph<XYPosition> {
+  private map: string[];
+  private open: string;
+  private wall: string;
+
+  constructor(map: string[], open = ".", wall = "#") {
+    this.map = map;
+    this.open = open;
+    this.wall = wall;
+  }
+
+  getNeighbors(p: XYPosition): XYPosition[] {
+    return _(moves)
+      .map((move) => xy(p.x + move[0], p.y + move[1]))
+      .filter(
+        (n) =>
+          _.inRange(n.x, 0, this.map[0].length) &&
+          _.inRange(n.y, 0, this.map.length) &&
+          this.map[n.y][n.x] === this.open
+      )
+      .value();
+  }
+
+  getNeighborDistance(): number {
+    return 1;
+  }
+}
+
+type Heuristic<P extends Position> = (p: P) => number;
 
 function dijkstraHeuristic(): number {
   return 0;
 }
 
-// hacked implementation of A* from the Wikipedia algo
-// see https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
-//
-// f(n) -> current best guess as to how short a path from start to finish can
-//         be if it goes through n
-// g(n) -> cost of the cheapest path from start to n currently known.
-// h(n) -> estimates the cost to reach goal from node n.
-export function shortestPath(
-  graph: Graph,
-  start: Position,
-  goal: Position,
-  h: (p: Position) => number = dijkstraHeuristic
-): Position[] {
-  const open = new MinHeap<Position>();
-  open.insert(h(start), start);
-  let cameFrom = Map<Position, Position>();
+export function manhattanHeuristic(goal: XYPosition): Heuristic<XYPosition> {
+  return (p: XYPosition) => Math.abs(goal.x - p.x) + Math.abs(goal.y + p.y);
+}
 
-  let g = Map<Position, number>();
+/**
+ * Implementation of A* from the Wikipedia algo
+ * see [](https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode)
+ *
+ * @param graph - Graph of maze positions.
+ * @param start - Position we are starting from
+ * @param goal - Postion we want to get to
+ * @param h - estimates the cost to reach goal from node n.
+ */
+export function findPath<P extends Position>(
+  graph: Graph<P>,
+  start: P,
+  goal: P,
+  h: Heuristic<P> = dijkstraHeuristic
+): P[] {
+  const open = new MinHeap<P>();
+  open.insert(h(start), start);
+  let cameFrom = Map<P, P>();
+
+  // g(n) -> cost of the cheapest path from start to n currently known.
+  let g = Map<P, number>();
   g = g.set(start, 0);
 
   let current = open.extract();
   while (current && !current.is(goal)) {
     for (const neighbor of graph.getNeighbors(current)) {
       const cost =
-        g.get(current, Infinity) + graph.getDistance(current, neighbor);
-      assert(cost < Infinity, `Should have code for node ${current}`);
+        g.get(current, Infinity) + graph.getNeighborDistance(current, neighbor);
+      assert(cost < Infinity, `Should have cost for node ${current}`);
       if (cost < g.get(neighbor, Infinity)) {
         cameFrom = cameFrom.set(neighbor, current);
         g = g.set(neighbor, cost);
+        // f(n) -> current best guess as to how short a path from start to
+        // finish can be if it goes through n
         const f = cost + h(neighbor);
         open.insert(f, neighbor);
       }
