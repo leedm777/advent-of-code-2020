@@ -41,7 +41,7 @@ describe("aoc helper functions", () => {
     });
 
     describe("given some data", () => {
-      it("should extract it in priorty order", async () => {
+      it("should extract it in priority order", async () => {
         const max = 100;
         _(_.range(1, max))
           .shuffle()

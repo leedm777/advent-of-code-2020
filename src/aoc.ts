@@ -1,5 +1,7 @@
 import _ from "lodash";
 import fs from "fs";
+import { Map } from "immutable";
+import assert from "assert";
 
 /**
  * Split a string into an array of numbers.
@@ -46,9 +48,14 @@ type HeapNode<T> = { priority: number; node: T };
 
 export class MinHeap<T> {
   heap: HeapNode<T>[];
+
   constructor() {
     // null element helps with the off by one errors
     this.heap = [];
+  }
+
+  isEmpty(): boolean {
+    return this.heap.length === 0;
   }
 
   insert(priority: number, node: T): void {
@@ -68,7 +75,11 @@ export class MinHeap<T> {
     }
   }
 
-  extract(): T {
+  extract(): T | undefined {
+    if (this.isEmpty()) {
+      return;
+    }
+
     const r = this.heap[0];
     if (this.heap.length <= 1) {
       this.heap = [];
@@ -107,4 +118,65 @@ export class MinHeap<T> {
   priority(i: number): number {
     return _.get(this.heap, i, { priority: Infinity }).priority;
   }
+}
+
+export interface Position {
+  is(other: Position): boolean;
+}
+
+export interface Graph {
+  getNeighbors(p: Position): Position[];
+
+  getDistance(start: Position, neighbor: Position): number;
+}
+
+function dijkstraHeuristic(): number {
+  return 0;
+}
+
+// hacked implementation of A* from the Wikipedia algo
+// see https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
+//
+// f(n) -> current best guess as to how short a path from start to finish can
+//         be if it goes through n
+// g(n) -> cost of the cheapest path from start to n currently known.
+// h(n) -> estimates the cost to reach goal from node n.
+export function shortestPath(
+  graph: Graph,
+  start: Position,
+  goal: Position,
+  h: (p: Position) => number = dijkstraHeuristic
+): Position[] {
+  const open = new MinHeap<Position>();
+  open.insert(h(start), start);
+  let cameFrom = Map<Position, Position>();
+
+  let g = Map<Position, number>();
+  g = g.set(start, 0);
+
+  let current = open.extract();
+  while (current && !current.is(goal)) {
+    for (const neighbor of graph.getNeighbors(current)) {
+      const cost =
+        g.get(current, Infinity) + graph.getDistance(current, neighbor);
+      assert(cost < Infinity, `Should have code for node ${current}`);
+      if (cost < g.get(neighbor, Infinity)) {
+        cameFrom = cameFrom.set(neighbor, current);
+        g = g.set(neighbor, cost);
+        const f = cost + h(neighbor);
+        open.insert(f, neighbor);
+      }
+    }
+
+    current = open.extract();
+  }
+
+  // walk back to the beginning to record the path
+  const path = [];
+  while (current) {
+    path.unshift(current);
+    current = cameFrom.get(current);
+  }
+
+  return path;
 }
