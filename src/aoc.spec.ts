@@ -1,6 +1,8 @@
 import _ from "lodash";
 import {
   findPath,
+  SideLogger,
+  manhattanHeuristic,
   MinHeap,
   splitChunks,
   splitLines,
@@ -8,7 +10,9 @@ import {
   splitWords,
   TextGraph,
   xy,
+  XYPosition,
 } from "./aoc";
+import { EventEmitter } from "events";
 
 describe("aoc helper functions", () => {
   describe("splitNumbers", () => {
@@ -125,8 +129,12 @@ describe("aoc helper functions", () => {
     });
 
     describe("findPath", () => {
-      it("should compute a straight line", () => {
-        const actual = findPath(uut, xy(0, 0), xy(9, 0));
+      it("should compute a straight line", async () => {
+        const actual = findPath({
+          graph: uut,
+          start: xy(0, 0),
+          goal: xy(9, 0),
+        });
         expect(actual).toStrictEqual([
           xy(0, 0),
           xy(1, 0),
@@ -141,8 +149,12 @@ describe("aoc helper functions", () => {
         ]);
       });
 
-      it("should go around corners", () => {
-        const actual = findPath(uut, xy(0, 0), xy(0, 2));
+      it("should go around corners", async () => {
+        const actual = findPath({
+          graph: uut,
+          start: xy(0, 0),
+          goal: xy(0, 2),
+        });
         expect(actual).toStrictEqual([
           xy(0, 0),
           xy(1, 0),
@@ -168,8 +180,48 @@ describe("aoc helper functions", () => {
         ]);
       });
 
-      it("should realize when there's no path", () => {
-        const actual = findPath(uut, xy(0, 0), xy(9, 4));
+      it("should realize when there's no path", async () => {
+        const emitter = new EventEmitter();
+
+        const log = new SideLogger("graph.log");
+        log.clear();
+        emitter.on(
+          "visit",
+          (
+            { x, y }: XYPosition,
+            open: XYPosition[],
+            closed: IterableIterator<XYPosition>
+          ) => {
+            // an example of how to log the map; may not be
+            // all that good, though.
+            function byChars(s: string): string[] {
+              return _.map(s, (x) => x);
+            }
+            const grid = _.map(uut.map, byChars);
+            open.forEach(({ x, y }) => {
+              grid[y][x] = "o";
+            });
+            for (const { x, y } of closed) {
+              grid[y][x] = "x";
+            }
+            grid[y][x] = "X";
+            const printable = _(grid)
+              .map((chars) => _.join(chars, ""))
+              .join("\n");
+            log.home();
+            log.log(printable);
+            log.log();
+          }
+        );
+
+        const goal = xy(9, 4);
+        const actual = findPath({
+          graph: uut,
+          start: xy(0, 0),
+          goal,
+          emitter,
+          h: manhattanHeuristic(goal),
+        });
         expect(actual).toStrictEqual([]);
       });
     });

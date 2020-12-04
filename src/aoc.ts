@@ -2,6 +2,53 @@ import _ from "lodash";
 import fs from "fs";
 import { Map } from "immutable";
 import assert from "assert";
+import { EventEmitter } from "events";
+import * as util from "util";
+
+/**
+ * Since the unit test framework makes it hard to use stdout/stderr, use
+ * SideLogger to log output to a file. You can use `tail +1f` to tail the log
+ * to see the output in realtime.
+ */
+export class SideLogger {
+  private readonly fd: number;
+
+  constructor(filename: string) {
+    this.fd = fs.openSync(filename, "w");
+  }
+
+  /**
+   * Clear the screen.
+   */
+  clear(): void {
+    fs.writeSync(this.fd, "\x1B[H\x1B[J");
+  }
+
+  /**
+   * Move cursor back to home.
+   */
+  home(): void {
+    fs.writeSync(this.fd, "\x1B[H");
+  }
+
+  /**
+   * Log a string, much like `console.log()`.
+   * @param str - String to log, or format.
+   * @param args - Args for the format string.
+   */
+  log(str = "", ...args: unknown[]): void {
+    str = util.format(str, ...args);
+    fs.writeSync(this.fd, `${str}\n`);
+  }
+
+  /**
+   * Write string without formatting, or ending newline.
+   * @param str - String to log.
+   */
+  puts(str: string): void {
+    fs.writeSync(this.fd, str);
+  }
+}
 
 /**
  * Split a string into an array of numbers.
@@ -191,7 +238,7 @@ const moves = [
 ];
 
 export class TextGraph implements Graph<XYPosition> {
-  private map: string[];
+  readonly map: string[];
   private open: string;
   private wall: string;
 
@@ -234,15 +281,23 @@ export function manhattanHeuristic(goal: XYPosition): Heuristic<XYPosition> {
  *
  * @param graph - Graph of maze positions.
  * @param start - Position we are starting from
- * @param goal - Postion we want to get to
+ * @param goal - Position we want to get to
  * @param h - estimates the cost to reach goal from node n.
+ * @param emitter - emitter to get graph updates
  */
-export function findPath<P extends Position>(
-  graph: Graph<P>,
-  start: P,
-  goal: P,
-  h: Heuristic<P> = dijkstraHeuristic
-): P[] {
+export function findPath<P extends Position>({
+  graph,
+  start,
+  goal,
+  h = dijkstraHeuristic,
+  emitter = new EventEmitter(),
+}: {
+  graph: Graph<P>;
+  start: P;
+  goal: P;
+  h?: Heuristic<P>;
+  emitter?: EventEmitter;
+}): P[] {
   const open = new MinHeap<P>();
   open.insert(h(start), start);
   let cameFrom = Map<P, P>();
@@ -253,6 +308,7 @@ export function findPath<P extends Position>(
 
   let current = open.extract();
   while (current && !current.is(goal)) {
+    emitter.emit("visit", current, _.map(open.heap, "node"), g.keys());
     for (const neighbor of graph.getNeighbors(current)) {
       const cost =
         g.get(current, Infinity) + graph.getNeighborDistance(current, neighbor);
