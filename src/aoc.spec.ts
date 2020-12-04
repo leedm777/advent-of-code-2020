@@ -2,8 +2,10 @@ import _ from "lodash";
 import {
   findPath,
   MinHeap,
+  splitChunks,
   splitLines,
   splitNumbers,
+  splitWords,
   TextGraph,
   xy,
 } from "./aoc";
@@ -11,14 +13,14 @@ import {
 describe("aoc helper functions", () => {
   describe("splitNumbers", () => {
     describe("given some numbers", () => {
-      it("should parse them into an array", async () => {
+      it("should parse them into an array", () => {
         const actual = splitNumbers("1 2 3 4\n5 6 \t 7");
         expect(actual).toStrictEqual([1, 2, 3, 4, 5, 6, 7]);
       });
     });
 
     describe("given empty file", () => {
-      it("should return empty array", async () => {
+      it("should return empty array", () => {
         const actual = splitNumbers("");
         expect(actual).toStrictEqual([]);
       });
@@ -27,15 +29,47 @@ describe("aoc helper functions", () => {
 
   describe("splitLines", () => {
     describe("given some lines", () => {
-      it("should split them into an array", async () => {
+      it("should split them into an array", () => {
         const actual = splitLines("line 1\nline 2");
         expect(actual).toStrictEqual(["line 1", "line 2"]);
       });
     });
 
     describe("given empty input", () => {
-      it("should return empty array", async () => {
+      it("should return empty array", () => {
         const actual = splitLines("");
+        expect(actual).toStrictEqual([]);
+      });
+    });
+  });
+
+  describe("splitChunks", () => {
+    describe("given some chunks", () => {
+      it("should split them into an array", () => {
+        const actual = splitChunks("chunk 1\nline2\n\nchunk 2");
+        expect(actual).toStrictEqual(["chunk 1\nline2", "chunk 2"]);
+      });
+    });
+
+    describe("given empty input", () => {
+      it("should return empty array", () => {
+        const actual = splitChunks("");
+        expect(actual).toStrictEqual([]);
+      });
+    });
+  });
+
+  describe("splitWords", () => {
+    describe("given some words", () => {
+      it("should split them into an array", () => {
+        const actual = splitWords("some words.\nmore\n\nwords");
+        expect(actual).toStrictEqual(["some", "words.", "more", "words"]);
+      });
+    });
+
+    describe("given empty input", () => {
+      it("should return empty array", () => {
+        const actual = splitWords("");
         expect(actual).toStrictEqual([]);
       });
     });
@@ -48,7 +82,7 @@ describe("aoc helper functions", () => {
     });
 
     describe("given some data", () => {
-      it("should extract it in priority order", async () => {
+      it("should extract it in priority order", () => {
         const max = 100;
         _(_.range(1, max))
           .shuffle()
@@ -91,7 +125,7 @@ describe("aoc helper functions", () => {
     });
 
     describe("findPath", () => {
-      it("should compute a straight line", async () => {
+      it("should compute a straight line", () => {
         const actual = findPath(uut, xy(0, 0), xy(9, 0));
         expect(actual).toStrictEqual([
           xy(0, 0),
@@ -107,7 +141,7 @@ describe("aoc helper functions", () => {
         ]);
       });
 
-      it("should go around corners", async () => {
+      it("should go around corners", () => {
         const actual = findPath(uut, xy(0, 0), xy(0, 2));
         expect(actual).toStrictEqual([
           xy(0, 0),
@@ -134,7 +168,7 @@ describe("aoc helper functions", () => {
         ]);
       });
 
-      it("should realize when there's no path", async () => {
+      it("should realize when there's no path", () => {
         const actual = findPath(uut, xy(0, 0), xy(9, 4));
         expect(actual).toStrictEqual([]);
       });

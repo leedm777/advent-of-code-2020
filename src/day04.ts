@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { splitChunks, splitWords } from "./aoc";
 
 /*
 The automatic passport scanners are slow because they're having trouble
@@ -28,28 +29,36 @@ const requiredFields = [
   "pid" /*, "cid" */,
 ];
 
-export function part1(input: string): number {
-  return _(input)
-    .split("\n\n")
-    .map((s) => _.split(s, /\s+/))
-    .map((fields) =>
-      _.map(fields, (s) => {
-        const [field] = _.split(s, ":");
-        return field;
-      })
-    )
-    .filter(
-      (fieldNames) => _.without(requiredFields, ...fieldNames).length === 0
-    )
-    .size();
-}
-
 interface Field {
   name: string;
   value: string;
 }
 
-export function isValidPassport(passport: Field[]): boolean {
+export function parsePassport(str: string): Field[] {
+  return _(str)
+    .thru(splitWords)
+    .map((s) => {
+      const [name, value] = _.split(s, ":");
+      return { name, value };
+    })
+    .value();
+}
+
+export function hasAllFields(passport: Field[]): boolean {
+  return _(requiredFields)
+    .without(..._.map(passport, "name"))
+    .isEmpty();
+}
+
+export function part1(input: string): number {
+  return _(input)
+    .thru(splitChunks)
+    .map(parsePassport)
+    .filter(hasAllFields)
+    .size();
+}
+
+export function areAllFieldsValid(passport: Field[]): boolean {
   return _.every(passport, ({ name, value }) => {
     const num = parseInt(value, 10);
     switch (name) {
@@ -89,16 +98,6 @@ export function isValidPassport(passport: Field[]): boolean {
   });
 }
 
-export function parsePassport(str: string): Field[] {
-  return _(str)
-    .split(/\s+/)
-    .map((s) => {
-      const [name, value] = _.split(s, ":");
-      return { name, value };
-    })
-    .value();
-}
-
 /*
 You can continue to ignore the cid field, but each other field has strict rules
 about what values are valid for automatic validation:
@@ -119,12 +118,9 @@ and valid according to the above rules. Here are some example values:
  */
 export function part2(input: string): number {
   return _(input)
-    .split("\n\n")
+    .thru(splitChunks)
     .map(parsePassport)
-    .filter(
-      (fields) =>
-        _.without(requiredFields, ..._.map(fields, "name")).length === 0
-    )
-    .filter(isValidPassport)
+    .filter(hasAllFields)
+    .filter(areAllFieldsValid)
     .size();
 }

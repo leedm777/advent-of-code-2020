@@ -1,4 +1,4 @@
-import { isValidPassport, parsePassport, part1, part2 } from "./day04";
+import { areAllFieldsValid, parsePassport, part1, part2 } from "./day04";
 import { readFile } from "./aoc";
 
 const puzzleInput = readFile("./src/day04.txt");
@@ -29,7 +29,7 @@ iyr:2011 ecl:brn hgt:59in`,
     });
   });
 
-  describe("isValid", () => {
+  describe("areAllFieldsValid", () => {
     it.each([
       // byr
       ["byr:1919", false],
@@ -42,7 +42,9 @@ iyr:2011 ecl:brn hgt:59in`,
       ["iyr:2020", true],
       ["iyr:2021", false],
     ])("passport %s -> %s", (passport, expected) => {
-      expect(isValidPassport(parsePassport(passport))).toStrictEqual(expected);
+      expect(areAllFieldsValid(parsePassport(passport))).toStrictEqual(
+        expected
+      );
     });
   });
 

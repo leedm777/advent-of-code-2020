@@ -35,6 +35,33 @@ export function splitLines(str: string): string[] {
 }
 
 /**
+ * Split a string into chunks separated by blank lines.
+ * @param str - String to split.
+ * @returns Array of chunks from the string.
+ */
+export function splitChunks(str: string): string[] {
+  str = _.trim(str);
+  if (str === "") {
+    return [];
+  }
+  return _.split(str, "\n\n");
+}
+
+/**
+ * Split a string into words.
+ *
+ * @param str - String to split.
+ * @returns Array of works from the string.
+ */
+export function splitWords(str: string): string[] {
+  str = _.trim(str);
+  if (str === "") {
+    return [];
+  }
+  return _.split(str, /\s+/);
+}
+
+/**
  * Read file as a UTF-8 string.
  *
  * @param name - Name of file to read.
