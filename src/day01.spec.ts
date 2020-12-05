@@ -3,9 +3,7 @@ import { part1, part2 } from "./day01";
 
 import { splitNumbers } from "./aoc";
 
-const puzzleInput = splitNumbers(
-  fs.readFileSync("./src/day01.txt", "utf-8").trim()
-);
+const puzzleInput = splitNumbers(fs.readFileSync("./src/day01.txt", "utf-8"));
 
 describe("day 1", () => {
   describe("part 1", () => {

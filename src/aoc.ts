@@ -115,7 +115,7 @@ export function splitWords(str: string): string[] {
  * @returns Contents of the file.
  */
 export function readFile(name: string): string {
-  return fs.readFileSync(name, "utf-8").trim();
+  return _.trim(fs.readFileSync(name, "utf-8"));
 }
 
 type HeapNode<T> = { priority: number; node: T };
@@ -260,9 +260,7 @@ export class TextGraph implements Graph<XYPosition> {
       .value();
   }
 
-  getNeighborDistance(): number {
-    return 1;
-  }
+  getNeighborDistance = _.constant(1);
 }
 
 type Heuristic<P extends Position> = (p: P) => number;

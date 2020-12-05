@@ -1,7 +1,8 @@
 import fs from "fs";
 import { part1, part2 } from "./day00";
+import _ from "lodash";
 
-const puzzleInput = fs.readFileSync("./src/day00.txt", "utf-8").trim();
+const puzzleInput = _.trim(fs.readFileSync("./src/day00.txt", "utf-8"));
 
 describe("day 00", () => {
   describe("part 1", () => {

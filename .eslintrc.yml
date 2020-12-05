@@ -7,12 +7,14 @@ extends:
   - prettier/standard
   - plugin:jest/recommended
   - plugin:eslint-comments/recommended
+  - plugin:lodash/canonical
 plugins:
   - "@typescript-eslint"
   - eslint-plugin-tsdoc
   - standard
   - prettier
   - eslint-comments
+  - lodash
   # TODO: jest, import, node
 overrides:
   - files: ["*.ts", "*.tsx"]
@@ -23,6 +25,7 @@ overrides:
 rules:
   prettier/prettier: error
   tsdoc/syntax: error
+  lodash/chaining: [error, always]
 env:
   node: true
 parser: "@typescript-eslint/parser"

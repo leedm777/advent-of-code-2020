@@ -88,14 +88,17 @@ describe("aoc helper functions", () => {
     describe("given some data", () => {
       it("should extract it in priority order", () => {
         const max = 100;
-        _(_.range(1, max))
+        _(1)
+          .range(max)
           .shuffle()
           .forEach((n) => uut.insert(n, n));
 
-        _.range(1, max).forEach((n) => {
-          const actual = uut.extract();
-          expect(actual).toStrictEqual(n);
-        });
+        _(1)
+          .range(max)
+          .forEach((n) => {
+            const actual = uut.extract();
+            expect(actual).toStrictEqual(n);
+          });
       });
     });
   });
@@ -194,11 +197,8 @@ describe("aoc helper functions", () => {
           ) => {
             // an example of how to log the map; may not be
             // all that good, though.
-            function byChars(s: string): string[] {
-              return _.map(s, (x) => x);
-            }
-            const grid = _.map(uut.map, byChars);
-            open.forEach(({ x, y }) => {
+            const grid = _.map(uut.map, (s) => _.split(s, ""));
+            _.forEach(open, ({ x, y }) => {
               grid[y][x] = "o";
             });
             for (const { x, y } of closed) {

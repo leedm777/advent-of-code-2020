@@ -83,7 +83,8 @@ export function areAllFieldsValid(passport: Field[]): boolean {
         return value.match(/^#[0-9a-f]{6}$/);
       case "ecl":
         // (Eye Color) - exactly one of: amb blu brn gry grn hzl oth.
-        return ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"].includes(
+        return _.includes(
+          ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"],
           value
         );
       case "pid":
@@ -117,10 +118,9 @@ Your job is to count the passports where all required fields are both present
 and valid according to the above rules. Here are some example values:
  */
 export function part2(input: string): number {
-  return _(input)
-    .thru(splitChunks)
-    .map(parsePassport)
-    .filter(hasAllFields)
-    .filter(areAllFieldsValid)
-    .size();
+  // TODO: explicit cast to make Typescript happy
+  const isValid = _.overEvery([hasAllFields, areAllFieldsValid]) as (
+    passpord: Field[]
+  ) => boolean;
+  return _(input).thru(splitChunks).map(parsePassport).filter(isValid).size();
 }
