@@ -26,6 +26,7 @@ describe("day 5", () => {
 
   describe("part 1", () => {
     it.each([
+      [[], undefined], // just figuring out why undefined is a possible response
       [["BFFFBBFRRR", "FFFBBBFRRR", "BBFFBBFRLL"], 820],
       [puzzleInput, 890],
     ])("input %#", (input, expected) => {

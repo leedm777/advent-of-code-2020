@@ -15,18 +15,16 @@ The last three characters will be either L or R; these specify exactly one of
    lower half, while R means to keep the upper half.
  */
 export function computeSeatId(code: string): number {
-  return (
-    _(code)
-      // TODO: useless map fixes "Property 'reduce' does not exist on type
-      //       'String'."; code runs fine w/o
-      .map((x) => x)
-      .reduce((id: number, ch: string) => {
-        let nextCode = id << 1;
-        if (ch === "B" || ch === "R") {
-          nextCode = nextCode | 1;
-        }
-        return nextCode;
-      }, 0)
+  return _.reduce(
+    code,
+    (id: number, ch: string) => {
+      let nextCode = id << 1;
+      if (ch === "B" || ch === "R") {
+        nextCode = nextCode | 1;
+      }
+      return nextCode;
+    },
+    0
   );
 }
 
