@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { splitLines } from "./aoc";
+import { splitCharacters, splitLines } from "./aoc";
 
 export function countUnionAnswers(input: string): number {
   return _(input)
@@ -13,10 +13,7 @@ export function part1(input: string[]): number {
 }
 
 export function countIntersectionAnswers(input: string): number {
-  const answers = _(input)
-    .thru(splitLines)
-    .map((s) => _.split(s, ""))
-    .value();
+  const answers = _(input).thru(splitLines).map(splitCharacters).value();
   const commonAnswers = _.intersection(...answers);
   return commonAnswers.length;
 }

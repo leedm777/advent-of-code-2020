@@ -109,6 +109,16 @@ export function splitWords(str: string): string[] {
 }
 
 /**
+ * Split a string into characters.
+ *
+ * @param str - String to split.
+ * @returns Array of characters from the string.
+ */
+export function splitCharacters(str: string): string[] {
+  return _.split(str, "");
+}
+
+/**
  * Read file as a UTF-8 string.
  *
  * @param name - Name of file to read.

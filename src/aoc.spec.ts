@@ -11,6 +11,7 @@ import {
   TextGraph,
   xy,
   XYPosition,
+  splitCharacters,
 } from "./aoc";
 import { EventEmitter } from "events";
 
@@ -74,6 +75,32 @@ describe("aoc helper functions", () => {
     describe("given empty input", () => {
       it("should return empty array", () => {
         const actual = splitWords("");
+        expect(actual).toStrictEqual([]);
+      });
+    });
+  });
+
+  describe("splitCharacters", () => {
+    describe("given a string", () => {
+      it("should split into characters", async () => {
+        const actual = splitCharacters("ab c\nde\tf");
+        expect(actual).toStrictEqual([
+          "a",
+          "b",
+          " ",
+          "c",
+          "\n",
+          "d",
+          "e",
+          "\t",
+          "f",
+        ]);
+      });
+    });
+
+    describe("given an empty input", () => {
+      it("should return an empty array", async () => {
+        const actual = splitCharacters("");
         expect(actual).toStrictEqual([]);
       });
     });
@@ -197,7 +224,7 @@ describe("aoc helper functions", () => {
           ) => {
             // an example of how to log the map; may not be
             // all that good, though.
-            const grid = _.map(uut.map, (s) => _.split(s, ""));
+            const grid = _.map(uut.map, splitCharacters);
             _.forEach(open, ({ x, y }) => {
               grid[y][x] = "o";
             });
