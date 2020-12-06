@@ -12,7 +12,6 @@ extends:
 plugins:
   - "@typescript-eslint"
   - eslint-plugin-tsdoc
-  - standard
   - prettier
   - eslint-comments
   - lodash
