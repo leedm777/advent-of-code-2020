@@ -32,14 +32,12 @@ export function part1(input: string[]): number | undefined {
   return _(input).map(computeSeatId).max();
 }
 
-export function part2(input: string[]): number {
+export function part2(input: string[]): number | undefined {
   const seats = _(input).map(computeSeatId).sortBy().value();
-  let prior = seats[0];
-  for (let i = 1; i < seats.length; ++i) {
-    if (seats[i] !== prior + 1) {
-      return prior + 1;
-    }
-    prior = seats[i];
-  }
-  return NaN;
+  return _.chain(seats)
+    .zip(_.drop(seats, 1))
+    .find(([prior, seat]) => (seat as number) > (prior as number) + 1)
+    .thru(_.first)
+    .thru((seat) => seat + 1)
+    .value();
 }
