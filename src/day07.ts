@@ -8,36 +8,42 @@ export interface LuggageRule {
   innerColors: { [key: string]: number };
 }
 
-function parseInnerColors(input: string) {
-  if (input === "no other bags.") {
-    return {};
-  }
-  return _(input)
-    .split(/, /)
-    .map((bag) => {
-      const [count, mod, color] = sscanf(bag, "%d %s %s") as [
-        number,
-        string,
-        string
-      ];
-      return { [`${mod} ${color}`]: count };
-    })
-    .reduce(_.assign) as { [key: string]: number };
-}
-
-export function parseLuggageRule(input: string): LuggageRule {
-  const [outerColor, innerString] = _.split(input, " bags contain ");
-  const innerColors = parseInnerColors(innerString);
-  return {
-    outerColor,
-    innerColors,
-  };
+interface LuggageMustContain {
+  [key: string]: number;
 }
 
 interface LuggageGraph {
   [key: string]: {
     canBeContainedBy: string[];
-    mustContain: { [key: string]: number };
+    mustContain: LuggageMustContain;
+  };
+}
+
+function parseMustContain(input: string): LuggageMustContain {
+  if (input === "no other bags.") {
+    return {};
+  }
+  return (
+    _(input)
+      .split(/, /)
+      .map((bag) => {
+        const [count, mod, color] = sscanf(bag, "%d %s %s") as [
+          number,
+          string,
+          string
+        ];
+        return { [`${mod} ${color}`]: count };
+      })
+      .reduce(_.assign) || {}
+  );
+}
+
+export function parseLuggageRule(input: string): LuggageRule {
+  const [outerColor, innerString] = _.split(input, " bags contain ");
+  const innerColors = parseMustContain(innerString);
+  return {
+    outerColor,
+    innerColors,
   };
 }
 
@@ -45,17 +51,17 @@ function graphLuggage(input: string[]): LuggageGraph {
   return _(input)
     .map(parseLuggageRule)
     .reduce((acc, { outerColor, innerColors }) => {
-      _.set(acc, `${outerColor}.mustContain`, innerColors);
-      _.forEach(innerColors, (count, innerColor) => {
-        const canBeContainedBy = _.get(
-          acc,
-          `${innerColor}.canBeContainedBy`,
-          []
-        );
-        canBeContainedBy.push(outerColor);
-        _.set(acc, `${innerColor}.canBeContainedBy`, canBeContainedBy);
-      });
-      return acc;
+      const canBeContainedBy = _.mapValues(innerColors, () => ({
+        canBeContainedBy: [outerColor],
+      }));
+      return _(acc)
+        .merge({ [outerColor]: { mustContain: innerColors } })
+        .mergeWith(canBeContainedBy, (a, b) => {
+          if (_.isArray(a)) {
+            return a.concat(b);
+          }
+        })
+        .value();
     }, {});
 }
 
