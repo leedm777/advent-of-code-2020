@@ -22,7 +22,7 @@ function parseInnerColors(input: string) {
       ];
       return { [`${mod} ${color}`]: count };
     })
-    .reduce(_.assign);
+    .reduce(_.assign) as { [key: string]: number };
 }
 
 export function parseLuggageRule(input: string): LuggageRule {
@@ -34,8 +34,15 @@ export function parseLuggageRule(input: string): LuggageRule {
   };
 }
 
-function graphLuggage(input: string[]) {
-  const graph = _(input)
+interface LuggageGraph {
+  [key: string]: {
+    canBeContainedBy: string[];
+    mustContain: { [key: string]: number };
+  };
+}
+
+function graphLuggage(input: string[]): LuggageGraph {
+  return _(input)
     .map(parseLuggageRule)
     .reduce((acc, { outerColor, innerColors }) => {
       _.set(acc, `${outerColor}.mustContain`, innerColors);
@@ -50,18 +57,16 @@ function graphLuggage(input: string[]) {
       });
       return acc;
     }, {});
-  return graph;
 }
 
 export function part1(input: string[]): number {
   const graph = graphLuggage(input);
 
-  console.log("graph", JSON.stringify(graph, null, 2));
   const canContainMyBag = new Set();
   const open = [myBag];
 
-  while (!_.isEmpty(open)) {
-    const bag = open.pop();
+  let bag;
+  while ((bag = open.pop())) {
     const { canBeContainedBy } = graph[bag];
     _.forEach(canBeContainedBy, (c) => {
       canContainMyBag.add(c);
@@ -72,7 +77,7 @@ export function part1(input: string[]): number {
   return canContainMyBag.size;
 }
 
-function countBags(graph, bag) {
+function countBags(graph: LuggageGraph, bag: string): number {
   const { mustContain } = graph[bag];
   return _(mustContain)
     .map((count, b) => count + count * countBags(graph, b))
