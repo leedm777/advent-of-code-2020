@@ -1,118 +1,106 @@
-import _ from "lodash";
-import { SideLogger } from "./aoc";
+import { EventEmitter } from "events";
+import im from "immutable";
+import { Machine, MachineError, parseProgram, runMachine } from "./vm";
+// import { SideLogger } from "./aoc";
 
-const log = new SideLogger("day08.log");
+// const log = new SideLogger("day08.log");
 
-interface Instruction {
-  operation: string;
-  arg: number;
-}
-
-interface Machine {
-  program: Instruction[];
-  instructionPointer: number;
-  acc: number;
-}
-
-export function parseInstruction(input: string): Instruction {
-  const [operation, argStr] = _.split(input, " ");
-  const arg = parseInt(argStr, 10);
-  return { operation, arg };
-}
-
-export function execute(machine: Machine): Machine {
-  const { program, instructionPointer, acc } = machine;
-  const { operation, arg } = program[instructionPointer];
-
-  log.log(`    ${operation} ${arg}`);
-  switch (operation) {
-    case "acc":
-      return {
-        ...machine,
-        instructionPointer: instructionPointer + 1,
-        acc: acc + arg,
-      };
-    case "jmp":
-      return {
-        ...machine,
-        instructionPointer: instructionPointer + arg,
-      };
-    case "nop":
-      return {
-        ...machine,
-        instructionPointer: instructionPointer + 1,
-      };
-    default:
-      throw new Error(`Unknown operation ${operation}`);
-  }
-}
-
+/*
+ * Run your copy of the boot code. Immediately before any instruction is
+ * executed a second time, what value is in the accumulator?
+ */
 export function part1(input: string[]): number {
-  const program = _.map(input, parseInstruction);
-  let machine = { program, acc: 0, instructionPointer: 0 };
-  const visited = new Set();
+  const program = parseProgram(input);
+  let machine = new Machine({ program });
+  let visited = im.Set();
+  // I'm gonna assume this infinite loop thing is just for this challenge, so
+  // I'll have a tracer local to day08 looking for infinite loops and throwing
+  // an error when they happen.
+  const tracer = new EventEmitter();
+  tracer.on("step", (m: Machine) => {
+    const { instructionPointer } = m;
+    if (visited.has(instructionPointer)) {
+      throw new MachineError("Infinite loop detected", m);
+    }
+    visited = visited.add(instructionPointer);
+  });
+
+  try {
+    runMachine(machine, tracer);
+  } catch (e) {
+    if (e instanceof MachineError) {
+      return e.machine.acc;
+    }
+  }
 
   while (!visited.has(machine.instructionPointer)) {
     visited.add(machine.instructionPointer);
-    machine = execute(machine);
+    machine = machine.execute();
   }
   return machine.acc;
 }
 
-function run(machine: Machine): number | null {
-  const visited = new Set();
-
-  while (true) {
-    log.log(`  ${machine.instructionPointer}`);
-    visited.add(machine.instructionPointer);
-    machine = execute(machine);
-    log.log(`    acc: ${machine.acc}`);
-    log.log(`    ip:  ${machine.instructionPointer}`);
-
-    if (visited.has(machine.instructionPointer)) {
-      return null;
-    }
-
-    if (machine.instructionPointer >= machine.program.length) {
-      return machine.acc;
-    }
-  }
-}
-
+/*
+ * Fix the program so that it terminates normally by changing exactly one jmp
+ * (to nop) or nop (to jmp). What is the value of the accumulator after the
+ * program terminates?
+ */
 export function part2(input: string[]): number {
-  const program = _.map(input, parseInstruction);
-  log.clear();
+  // log.clear();
 
+  const program = parseProgram(input);
   for (
     let patchInstruction = 0;
-    patchInstruction < program.length;
+    patchInstruction < program.size;
     ++patchInstruction
   ) {
-    const machine: Machine = { program: [], acc: 0, instructionPointer: 0 };
-    let res = null;
-    switch (program[patchInstruction].operation) {
-      case "jmp":
-        log.log(
-          `Patching #${patchInstruction} jmp ${program[patchInstruction].arg}`
-        );
-        machine.program = _.cloneDeep(program);
-        machine.program[patchInstruction].operation = "nop";
-        res = run(machine);
-        break;
-      case "nop":
-        log.log(
-          `Patching #${patchInstruction} nop ${program[patchInstruction].arg}`
-        );
-        machine.program = _.cloneDeep(program);
-        machine.program[patchInstruction].operation = "jmp";
-        res = run(machine);
-        break;
-      default:
-        // skip
-        break;
-    }
-    if (!_.isNil(res)) {
-      return res;
+    try {
+      let visited = im.Set();
+      const tracer = new EventEmitter();
+      tracer.on("step", (m: Machine) => {
+        // log.log(`  ${m}`);
+        const { instructionPointer } = m;
+        if (visited.has(instructionPointer)) {
+          throw new MachineError("Infinite loop detected", m);
+        }
+        visited = visited.add(instructionPointer);
+      });
+
+      const machine = new Machine({ program });
+      let res: Machine | null = null;
+      const toPatch = program.get(patchInstruction);
+      switch (toPatch?.operation) {
+        case "jmp": {
+          // log.log(`Patching #${patchInstruction} ${toPatch} => nop`);
+          const patched = machine.setIn(
+            ["program", patchInstruction, "operation"],
+            "nop"
+          );
+          res = runMachine(patched, tracer);
+          break;
+        }
+        case "nop": {
+          // log.log(`Patching #${patchInstruction} ${toPatch} => jmp`);
+          const patched = machine.setIn(
+            ["program", patchInstruction, "operation"],
+            "jmp"
+          );
+          res = runMachine(patched, tracer);
+          break;
+        }
+        default:
+          // skip
+          break;
+      }
+
+      if (res) {
+        return res.acc;
+      }
+    } catch (err) {
+      if (err.message !== "Infinite loop detected") {
+        // unexpected error
+        throw err;
+      }
     }
   }
 
