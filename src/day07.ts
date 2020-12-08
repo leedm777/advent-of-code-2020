@@ -1,15 +1,23 @@
 import _ from "lodash";
 import { sscanf } from "scanf";
 
-const myBag = "shiny gold";
+/*
+ * Due to recent aviation regulations, many rules (your puzzle input) are being
+ * enforced about bags and their contents; bags must be color-coded and must
+ * contain specific quantities of other color-coded bags. Apparently, nobody
+ * responsible for these regulations considered how long they would take to
+ * enforce!
+ */
 
-export interface LuggageRule {
-  outerColor: string;
-  innerColors: { [key: string]: number };
-}
+const myBag = "shiny gold";
 
 interface LuggageMustContain {
   [key: string]: number;
+}
+
+export interface LuggageRule {
+  outerColor: string;
+  innerColors: LuggageMustContain;
 }
 
 interface LuggageGraph {
@@ -65,6 +73,9 @@ function graphLuggage(input: string[]): LuggageGraph {
     }, {});
 }
 
+/*
+ * How many bag colors can eventually contain at least one shiny gold bag?
+ */
 export function part1(input: string[]): number {
   const graph = graphLuggage(input);
 
@@ -90,6 +101,9 @@ function countBags(graph: LuggageGraph, bag: string): number {
     .sum();
 }
 
+/*
+ * How many individual bags are required inside your single shiny gold bag?
+ */
 export function part2(input: string[]): number {
   const graph = graphLuggage(input);
 

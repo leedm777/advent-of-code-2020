@@ -12,7 +12,7 @@ describe("day 00", () => {
       ["1234", 0],
       ["91212129", 9],
       [puzzleInput, 1044],
-    ])("%s -> %d", (input, expected) => {
+    ])("input %#", (input, expected) => {
       const actual = part1(input);
       expect(actual).toStrictEqual(expected);
     });
@@ -25,7 +25,7 @@ describe("day 00", () => {
       ["123123", 12],
       ["12131415", 4],
       [puzzleInput, 1054],
-    ])("%s -> %d", (input, expected) => {
+    ])("input %#", (input, expected) => {
       const actual = part2(input);
       expect(actual).toStrictEqual(expected);
     });
