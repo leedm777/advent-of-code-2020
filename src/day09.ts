@@ -44,11 +44,22 @@ export function part2({
   seq: number[];
 }): number {
   const invalidNumber = part1({ preamble, seq });
-  for (let i = 0; i < seq.length; ++i) {
-    for (let j = i + 1; j < seq.length; ++j) {
-      const slice = seq.slice(i, j);
-      if (invalidNumber === _.sum(slice)) {
+  /*
+   * Find the slice that sums to a given number. Start with the range of just
+   * the first number. If it's too small, extend the end of the range by one.
+   * If it's too large, drop the first of the range. Only works for non-negative
+   * numbers.
+   */
+  let sum = 0;
+  for (let i = 0; i < seq.length; ) {
+    for (let j = 0; j < seq.length; ) {
+      if (sum === invalidNumber) {
+        const slice = seq.slice(i, j);
         return (_.min(slice) as number) + (_.max(slice) as number);
+      } else if (sum < invalidNumber) {
+        sum += seq[j++];
+      } else if (sum > invalidNumber) {
+        sum -= seq[i++];
       }
     }
   }
