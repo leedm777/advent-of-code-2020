@@ -398,14 +398,10 @@ export function findNumbersThatSum(
  */
 export function findSliceThatSum(numbers: number[], target: number): number[] {
   // Immutable.js Map is 2x as slow as native mutable Map :-(
-  const hm = new global.Map<number, number>();
+  const hm = new global.Map<number, number>([[0, -1]]);
   let sum = 0;
   for (let i = 0; i < numbers.length; ++i) {
     sum += numbers[i];
-
-    if (sum === target) {
-      return _.slice(numbers, 0, i + 1);
-    }
 
     const prefix = hm.get(sum - target);
     if (!_.isNil(prefix)) {
