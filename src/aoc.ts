@@ -343,3 +343,47 @@ export function findPath<P extends Position>({
 
   return path;
 }
+
+export function findNumbersThatSum(
+  numbers: number[],
+  target: number,
+  n = 2
+): number[] | undefined {
+  // console.log(`findNumbersThatSum(${JSON.stringify(numbers)}, ${target}, ${n})`);
+  // If we've run out of input, there is no match
+  if (_.isEmpty(numbers)) {
+    return undefined;
+  }
+
+  // If we're looking for a single number, just find it in the numbers
+  if (n === 1) {
+    // console.log(`  single number ${target}`);
+    if (_.includes(numbers, target)) {
+      // console.log(`    found it`);
+      return [target];
+    }
+    return undefined;
+  }
+
+  // We're looking for n numbers whose sum is target. Since all numbers are
+  // positive, we can optimize a bit.
+  return (
+    _(numbers)
+      // filter out any numbers that are too large
+      .filter((num) => num < target)
+      // For `num` to be a solution for `target`, the remaining array has to be
+      // a solution for `target - num`.
+      .map((num, idx) => {
+        // console.log(`Finding answer for ${num}`);
+        const restOfNumbers = _.drop(numbers, idx + 1);
+        const restOfAnswer = findNumbersThatSum(
+          restOfNumbers,
+          target - num,
+          n - 1
+        );
+        return restOfAnswer && [...restOfAnswer, num];
+      })
+      // and find the first solution
+      .find((num) => !_.isNil(num))
+  );
+}
