@@ -387,3 +387,32 @@ export function findNumbersThatSum(
       .find((num) => !_.isNil(num))
   );
 }
+
+/**
+ * Find the slice of numbers in an array that sum to the given target number.
+ * Algorithm from https://www.geeksforgeeks.org/find-subarray-with-given-sum-in-array-of-integers/
+ *
+ * @param numbers - array of numbers to search
+ * @param target - sum to search for
+ * @returns slice of numbers that sum to target
+ */
+export function findSliceThatSum(numbers: number[], target: number): number[] {
+  // Immutable.js Map is 2x as slow as native mutable Map :-(
+  const hm = new global.Map<number, number>();
+  let sum = 0;
+  for (let i = 0; i < numbers.length; ++i) {
+    sum += numbers[i];
+
+    if (sum === target) {
+      return _.slice(numbers, 0, i + 1);
+    }
+
+    const prefix = hm.get(sum - target);
+    if (!_.isNil(prefix)) {
+      return _.slice(numbers, prefix + 1, i + 1);
+    }
+
+    hm.set(sum, i);
+  }
+  return [];
+}

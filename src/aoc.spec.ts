@@ -12,6 +12,7 @@ import {
   xy,
   XYPosition,
   splitCharacters,
+  findSliceThatSum,
 } from "./aoc";
 import { EventEmitter } from "events";
 
@@ -251,6 +252,44 @@ describe("aoc helper functions", () => {
         });
         expect(actual).toStrictEqual([]);
       });
+    });
+  });
+
+  describe("findSliceThatSum", () => {
+    it.each([
+      [
+        {
+          numbers: [1, 4, 20, 3, 10, 5],
+          sum: 33,
+        },
+        [20, 3, 10],
+      ],
+      [
+        {
+          numbers: [10, 2, -2, -20, 10],
+          sum: -10,
+        },
+        [10, 2, -2, -20],
+      ],
+      [
+        {
+          numbers: [-10, 0, 2, -2, -20, 10],
+          sum: 20,
+        },
+        [],
+      ],
+    ])("case $#", ({ numbers, sum }, expected) => {
+      const actual = findSliceThatSum(numbers, sum);
+      expect(actual).toStrictEqual(expected);
+    });
+
+    it("should work with a really large range", async () => {
+      const numbers = _(1).range(10000).shuffle().value();
+      const expected = _.slice(numbers, 156, 9543);
+      const target = _.sum(expected);
+
+      const actual = findSliceThatSum(numbers, target);
+      expect(actual).toStrictEqual(expected);
     });
   });
 });

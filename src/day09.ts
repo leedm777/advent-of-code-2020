@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { findNumbersThatSum } from "./aoc";
+import { findNumbersThatSum, findSliceThatSum } from "./aoc";
 
 /*
  * XMAS starts by transmitting a preamble of 25 numbers. After that, each number
@@ -44,24 +44,9 @@ export function part2({
   seq: number[];
 }): number {
   const invalidNumber = part1({ preamble, seq });
-  /*
-   * Find the slice that sums to a given number. Start with the range of just
-   * the first number. If it's too small, extend the end of the range by one.
-   * If it's too large, drop the first of the range. Only works for non-negative
-   * numbers.
-   */
-  let sum = 0;
-  for (let i = 0; i < seq.length; ) {
-    for (let j = 0; j < seq.length; ) {
-      if (sum === invalidNumber) {
-        const slice = seq.slice(i, j);
-        return (_.min(slice) as number) + (_.max(slice) as number);
-      } else if (sum < invalidNumber) {
-        sum += seq[j++];
-      } else if (sum > invalidNumber) {
-        sum -= seq[i++];
-      }
-    }
+  const slice = findSliceThatSum(seq, invalidNumber);
+  if (_.isEmpty(slice)) {
+    return NaN;
   }
-  return NaN;
+  return (_.min(slice) as number) + (_.max(slice) as number);
 }
