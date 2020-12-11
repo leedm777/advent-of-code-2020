@@ -1,4 +1,10 @@
-import { part1, part2, nextSeating, nextSeatingPartTwo } from "./day11";
+import {
+  part1,
+  part2,
+  nextSeating,
+  nextSeatingPartTwo,
+  buildNeighborMap,
+} from "./day11";
 import { readFile, splitLines } from "./aoc";
 
 const puzzleInput = splitLines(readFile("./src/day11.txt"));
@@ -213,7 +219,8 @@ describe("day11", () => {
       [exampleSequencePartTwo[6], exampleSequencePartTwo[6]],
       [exampleSequencePartTwo[6], exampleSequencePartTwo[6]],
     ])("input %#", (input, expected) => {
-      const actual = nextSeatingPartTwo(input);
+      const map = buildNeighborMap(exampleSequencePartTwo[0]);
+      const actual = nextSeatingPartTwo(input, map);
       expect(actual).toStrictEqual(expected);
     });
   });

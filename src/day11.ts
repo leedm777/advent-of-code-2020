@@ -90,32 +90,68 @@ const directions = [
  * Now, instead of considering just the eight immediately adjacent seats,
  * consider the first seat in each of those eight directions.
  */
-function getNeighborsPartTwo({
-  seating,
-  x,
-  y,
-}: {
-  seating: string[];
+// OLD IMPLEMENTATION
+// function getNeighborsPartTwo({
+//   seating,
+//   x,
+//   y,
+// }: {
+//   seating: string[];
+//   x: number;
+//   y: number;
+// }) {
+//   const neighbors = [];
+//   for (const [dy, dx] of directions) {
+//     let px = x + dx;
+//     let py = y + dy;
+//
+//     // log.log(`(${x}, ${y})`);
+//     let seat;
+//     while ((seat = _.get(seating, [py, px])) === ".") {
+//       px += dx;
+//       py += dy;
+//     }
+//
+//     // log.log(`  (${px}, ${px}) = ${seat}`);
+//
+//     neighbors.push(seat);
+//   }
+//   return neighbors;
+// }
+
+interface Coord {
   x: number;
   y: number;
-}) {
-  const neighbors = [];
-  for (const [dy, dx] of directions) {
-    let px = x + dx;
-    let py = y + dy;
+}
 
-    // log.log(`(${x}, ${y})`);
-    let seat;
-    while ((seat = _.get(seating, [py, px])) === ".") {
-      px += dx;
-      py += dy;
+export function buildNeighborMap(seating: string[]): Coord[][][] {
+  const map: Coord[][][] = [];
+  for (let y = 0; y < seating.length; ++y) {
+    const row: Coord[][] = [];
+    map.push(row);
+    for (let x = 0; x < seating[y].length; ++x) {
+      const neighbors: Coord[] = [];
+      for (const [dy, dx] of directions) {
+        let px = x + dx;
+        let py = y + dy;
+
+        // log.log(`(${x}, ${y})`);
+        let seat;
+        while ((seat = _.get(seating, [py, px])) === ".") {
+          px += dx;
+          py += dy;
+        }
+        // log.log(`  (${px}, ${px}) = ${seat}`);
+
+        if (!_.isNil(seat)) {
+          neighbors.push({ x: px, y: py });
+        }
+      }
+      row.push(neighbors);
     }
-
-    // log.log(`  (${px}, ${px}) = ${seat}`);
-
-    neighbors.push(seat);
   }
-  return neighbors;
+
+  return map;
 }
 
 /*
@@ -125,13 +161,18 @@ function getNeighborsPartTwo({
  * seats that see no occupied seats become occupied, seats matching no rule
  * don't change, and floor never changes.
  */
-export function nextSeatingPartTwo(seating: string[]): string[] {
+export function nextSeatingPartTwo(
+  seating: string[],
+  map: Coord[][][]
+): string[] {
   const next = [];
   for (let y = 0; y < seating.length; ++y) {
     let row = "";
     for (let x = 0; x < seating[y].length; ++x) {
       const seat = seating[y][x];
-      const neighbors = getNeighborsPartTwo({ seating, x, y });
+      // const neighbors = getNeighborsPartTwo({ seating, x, y });
+      const neighbors = _.map(map[y][x], ({ x: nx, y: ny }) => seating[ny][nx]);
+      // log.log(JSON.stringify(neighbors, null, 2));
       switch (seat) {
         case "L":
           row += _.every(neighbors, (n) => n !== "#") ? "#" : "L";
@@ -155,12 +196,13 @@ export function nextSeatingPartTwo(seating: string[]): string[] {
 }
 
 export function part2(input: string[]): number {
+  const map = buildNeighborMap(input);
   let current = input;
-  let next = nextSeatingPartTwo(current);
+  let next = nextSeatingPartTwo(current, map);
   while (!_.isEqual(current, next)) {
-    // log.log(_.join(current, "\n"));
+    log.log(_.join(current, "\n"));
     current = next;
-    next = nextSeatingPartTwo(current);
+    next = nextSeatingPartTwo(current, map);
   }
 
   const counts = _.chain(current).join("\n").countBy().value();
