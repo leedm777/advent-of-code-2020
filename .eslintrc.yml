@@ -30,6 +30,7 @@ rules:
   prettier/prettier: error
   tsdoc/syntax: error
   lodash/chaining: [error, always]
+  lodash/path-style: off
 env:
   node: true
 parser: "@typescript-eslint/parser"
