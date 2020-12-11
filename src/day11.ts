@@ -1,6 +1,17 @@
 import _ from "lodash";
 import { SideLogger } from "./aoc";
 
+const directions = [
+  [-1, -1],
+  [-1, 0],
+  [-1, 1],
+  [0, -1],
+  [0, 1],
+  [1, -1],
+  [1, 0],
+  [1, 1],
+];
+
 function getNeighbors({
   seating,
   x,
@@ -11,14 +22,14 @@ function getNeighbors({
   y: number;
 }): string[] {
   return [
-    _.get(seating, [y - 1, x - 1]),
-    _.get(seating, [y, x - 1]),
-    _.get(seating, [y + 1, x - 1]),
-    _.get(seating, [y - 1, x]),
-    _.get(seating, [y + 1, x]),
-    _.get(seating, [y - 1, x + 1]),
-    _.get(seating, [y, x + 1]),
-    _.get(seating, [y + 1, x + 1]),
+    seating[y - 1] && seating[y - 1][x - 1],
+    seating[y] && seating[y][x - 1],
+    seating[y + 1] && seating[y + 1][x - 1],
+    seating[y - 1] && seating[y - 1][x],
+    seating[y + 1] && seating[y + 1][x],
+    seating[y - 1] && seating[y - 1][x + 1],
+    seating[y] && seating[y][x + 1],
+    seating[y + 1] && seating[y + 1][x + 1],
   ];
 }
 
@@ -75,17 +86,6 @@ export function part1(input: string[]): number {
   return counts["#"];
 }
 
-const directions = [
-  [-1, -1],
-  [-1, 0],
-  [-1, 1],
-  [0, -1],
-  [0, 1],
-  [1, -1],
-  [1, 0],
-  [1, 1],
-];
-
 /*
  * Now, instead of considering just the eight immediately adjacent seats,
  * consider the first seat in each of those eight directions.
@@ -137,7 +137,7 @@ export function buildNeighborMap(seating: string[]): Coord[][][] {
 
         // log.log(`(${x}, ${y})`);
         let seat;
-        while ((seat = _.get(seating, [py, px])) === ".") {
+        while ((seat = seating[py] && seating[py][px]) === ".") {
           px += dx;
           py += dy;
         }
