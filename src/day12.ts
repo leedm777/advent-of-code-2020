@@ -7,21 +7,14 @@ const forward = ["E", "S", "W", "N"];
 
 export type Pos = [number, number];
 
-export function rotateAbout(
-  [wx, wy]: Pos,
-  [x, y]: Pos,
-  clockwise: number
-): Pos {
-  const dx = wx - x;
-  const dy = wy - y;
-
+export function rotateAbout([dx, dy]: Pos, clockwise: number): Pos {
   switch (clockwise) {
     case 90:
-      return [x + dy, y - dx];
+      return [dy, -dx];
     case 180:
-      return [x - dx, y - dy];
+      return [-dx, -dy];
     case 270:
-      return [x - dy, y + dx];
+      return [-dy, dx];
     default:
       throw new Error("Unsupported rotation");
   }
@@ -70,8 +63,8 @@ export function part1(input: string[]): number {
 export function part2(input: string[]): number {
   let x = 0;
   let y = 0;
-  let wx = 10;
-  let wy = 1;
+  let dx = 10;
+  let dy = 1;
 
   for (const line of input) {
     const dir = line[0];
@@ -79,38 +72,32 @@ export function part2(input: string[]): number {
 
     switch (dir) {
       case "N":
-        wy += mag;
+        dy += mag;
         break;
       case "S":
-        wy -= mag;
+        dy -= mag;
         break;
       case "E":
-        wx += mag;
+        dx += mag;
         break;
       case "W":
-        wx -= mag;
+        dx -= mag;
         break;
       case "L":
-        [wx, wy] = rotateAbout([wx, wy], [x, y], 360 - mag);
+        [dx, dy] = rotateAbout([dx, dy], 360 - mag);
         break;
       case "R":
-        [wx, wy] = rotateAbout([wx, wy], [x, y], mag);
+        [dx, dy] = rotateAbout([dx, dy], mag);
         break;
       case "F":
-        {
-          const dx = mag * (wx - x);
-          const dy = mag * (wy - y);
-          x += dx;
-          y += dy;
-          wx += dx;
-          wy += dy;
-        }
+        x += mag * dx;
+        y += mag * dy;
         break;
       default:
         throw new Error("wat?");
     }
 
-    log.log(`${line}: [${x}, ${y}] [${wx}, ${wy}] [${wx - x}, ${wy - y}]`);
+    log.log(`${line}: [${x}, ${y}] [${dx}, ${dy}]`);
   }
 
   return Math.abs(x) + Math.abs(y);

@@ -7,12 +7,11 @@ describe("day12", () => {
   describe("rotateAbout", () => {
     it.each([
       [
-        [180, 42],
-        [170, 38],
-        [174, 28],
+        [10, 4],
+        [4, -10],
       ],
-    ])("input %#", (waypoint, center, expected) => {
-      const actual = rotateAbout(waypoint as Pos, center as Pos, 90);
+    ])("input %#", (waypoint, expected) => {
+      const actual = rotateAbout(waypoint as Pos, 90);
       expect(actual).toStrictEqual(expected as Pos);
     });
   });
