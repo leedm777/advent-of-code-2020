@@ -159,6 +159,10 @@ export class MinHeap<T> {
     }
   }
 
+  peek(): T | undefined {
+    return this.heap[0].node;
+  }
+
   extract(): T | undefined {
     if (this.isEmpty()) {
       return;
