@@ -116,7 +116,7 @@ export function part2([, busIdStr]: string[]): number {
     .value();
 
   // we now have a system of equations we want to solve, where
-  // bus[n].id - t % bus[n].id === bus[n].offset
+  //   (t + bus[n].offset = 0) mod bus[n].id
   // but n could be so large we can't brute force it
 
   // Math-ish would be (t = (bus[n].id - bus[n].offset)) mod bus[n].id
