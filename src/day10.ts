@@ -1,6 +1,5 @@
 import _ from "lodash";
 import { makeSideLogger } from "./aoc";
-// import { SideLogger } from "./aoc";
 
 function computeDeltas(input: number[]): number[] {
   input = _.concat(input, [0, (_.max(input) as number) + 3]);
@@ -22,7 +21,7 @@ export function part1(input: number[]): number {
   return groups["1"] * groups["3"];
 }
 
-const log = makeSideLogger("./day10.log");
+const log = makeSideLogger("./day10.log", true);
 log.clear();
 
 // TODO: I wonder if there's a better way other than memoizing...
