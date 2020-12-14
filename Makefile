@@ -18,3 +18,11 @@ test:
 	npx jest
 	$(MAKE) lint
 .PHONY: test
+
+profile:
+	rm -f *.log
+	time npx --no-install tsc
+	node --prof $(shell npx which jest) --maxWorkers 0 dist/day11.spec.js --modulePathIgnorePatterns build src
+	node --prof-process isolate-*-v8.log > dist/perf.txt
+	less dist/perf.txt
+.PHONY: profile
