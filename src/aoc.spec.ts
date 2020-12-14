@@ -1,7 +1,6 @@
 import _ from "lodash";
 import {
   findPath,
-  SideLogger,
   manhattanHeuristic,
   MinHeap,
   splitChunks,
@@ -13,6 +12,7 @@ import {
   XYPosition,
   splitCharacters,
   findSliceThatSum,
+  makeSideLogger,
 } from "./aoc";
 import { EventEmitter } from "events";
 
@@ -214,7 +214,7 @@ describe("aoc helper functions", () => {
       it("should realize when there's no path", async () => {
         const emitter = new EventEmitter();
 
-        const log = new SideLogger("graph.log");
+        const log = makeSideLogger("graph.log", true);
         log.clear();
         emitter.on(
           "visit",

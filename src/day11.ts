@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { SideLogger } from "./aoc";
+import { makeSideLogger } from "./aoc";
 
 const directions = [
   [-1, -1],
@@ -69,7 +69,7 @@ export function nextSeating(seating: string[]): string[] {
   return next;
 }
 
-const log = new SideLogger("day11.log");
+const log = makeSideLogger("day11.log", true);
 log.clear();
 
 export function part1(input: string[]): number {

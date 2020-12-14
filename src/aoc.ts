@@ -5,12 +5,19 @@ import assert from "assert";
 import { EventEmitter } from "events";
 import * as util from "util";
 
+interface Logger {
+  clear(): void;
+  home(): void;
+  log(str?: string, ...args: unknown[]): void;
+  puts(str: string): void;
+}
+
 /**
  * Since the unit test framework makes it hard to use stdout/stderr, use
  * SideLogger to log output to a file. You can use `tail +1f` to tail the log
  * to see the output in realtime.
  */
-export class SideLogger {
+export class SideLogger implements Logger {
   private readonly fd: number;
 
   constructor(filename: string) {
@@ -48,6 +55,19 @@ export class SideLogger {
   puts(str: string): void {
     fs.writeSync(this.fd, str);
   }
+}
+
+export function makeSideLogger(filename: string, disabled = false): Logger {
+  if (disabled) {
+    return {
+      clear: _.noop,
+      home: _.noop,
+      log: _.noop,
+      puts: _.noop,
+    };
+  }
+
+  return new SideLogger(filename);
 }
 
 /**

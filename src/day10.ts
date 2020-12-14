@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { makeSideLogger } from "./aoc";
 // import { SideLogger } from "./aoc";
 
 function computeDeltas(input: number[]): number[] {
@@ -21,12 +22,12 @@ export function part1(input: number[]): number {
   return groups["1"] * groups["3"];
 }
 
-// const log = new SideLogger("./day10.log");
-// log.clear();
+const log = makeSideLogger("./day10.log");
+log.clear();
 
 // TODO: I wonder if there's a better way other than memoizing...
 const possibleCombinations = _.memoize((deltas: number[]): number => {
-  // log.log(JSON.stringify(deltas));
+  log.log(JSON.stringify(deltas));
   if (deltas.length <= 1) {
     return 1;
   }
@@ -36,7 +37,7 @@ const possibleCombinations = _.memoize((deltas: number[]): number => {
     // If the first two numbers can sum to less than three, then we could either
     // leave it, or drop it. Compute both possibilities.
 
-    // log.log("SPLIT");
+    log.log("SPLIT");
     return (
       possibleCombinations(_.drop(deltas, 1)) +
       possibleCombinations(_.concat([sumFirstTwo], _.drop(deltas, 2)))

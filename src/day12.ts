@@ -1,7 +1,7 @@
 import _ from "lodash";
-import { SideLogger } from "./aoc";
+import { makeSideLogger } from "./aoc";
 
-const log = new SideLogger("day12.log");
+const log = makeSideLogger("day12.log", true);
 log.clear();
 
 const forward = ["E", "S", "W", "N"];

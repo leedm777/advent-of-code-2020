@@ -1,7 +1,7 @@
 import _ from "lodash";
+import { makeSideLogger } from "./aoc";
 
-const log = { log: _.noop, clear: _.noop };
-// new SideLogger("day13.log");
+const log = makeSideLogger("day13.log");
 log.clear();
 
 export function part1([earliestStr, busIdStr]: string[]): number {

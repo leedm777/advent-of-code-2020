@@ -1,9 +1,9 @@
 import { EventEmitter } from "events";
 import im from "immutable";
 import { Machine, MachineError, parseProgram, runMachine } from "./vm";
-// import { SideLogger } from "./aoc";
+import { makeSideLogger } from "./aoc";
 
-// const log = new SideLogger("day08.log");
+const log = makeSideLogger("day08.log", true);
 
 /*
  * Run your copy of the boot code. Immediately before any instruction is
@@ -46,7 +46,7 @@ export function part1(input: string[]): number {
  * program terminates?
  */
 export function part2(input: string[]): number {
-  // log.clear();
+  log.clear();
 
   const program = parseProgram(input);
   for (
@@ -58,7 +58,7 @@ export function part2(input: string[]): number {
       let visited = im.Set();
       const tracer = new EventEmitter();
       tracer.on("step", (m: Machine) => {
-        // log.log(`  ${m}`);
+        log.log(`  ${m}`);
         const { instructionPointer } = m;
         if (visited.has(instructionPointer)) {
           throw new MachineError("Infinite loop detected", m);
@@ -71,7 +71,7 @@ export function part2(input: string[]): number {
       const toPatch = program.get(patchInstruction);
       switch (toPatch?.operation) {
         case "jmp": {
-          // log.log(`Patching #${patchInstruction} ${toPatch} => nop`);
+          log.log(`Patching #${patchInstruction} ${toPatch} => nop`);
           const patched = machine.setIn(
             ["program", patchInstruction, "operation"],
             "nop"
@@ -80,7 +80,7 @@ export function part2(input: string[]): number {
           break;
         }
         case "nop": {
-          // log.log(`Patching #${patchInstruction} ${toPatch} => jmp`);
+          log.log(`Patching #${patchInstruction} ${toPatch} => jmp`);
           const patched = machine.setIn(
             ["program", patchInstruction, "operation"],
             "jmp"
