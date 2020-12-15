@@ -1,57 +1,40 @@
 import _ from "lodash";
-import { makeSideLogger } from "./aoc";
+// import { makeSideLogger } from "./aoc";
 
-interface Game {
-  roundsPlayed: number;
-  seq: number[];
-  startingNumbers: number[];
-}
-
-export function playRound({ roundsPlayed, seq, startingNumbers }: Game): Game {
-  if (!_.isEmpty(startingNumbers)) {
-    const [next, ...nextStarting] = startingNumbers;
-    return {
-      roundsPlayed: roundsPlayed + 1,
-      seq: _.concat(seq, [next]),
-      startingNumbers: nextStarting,
-    };
-  }
-
-  const last = _.last(seq) as number;
-  const prior = _.findLastIndex(seq, (n) => n === last, _.size(seq) - 2);
-  let next = 0;
-  if (prior !== -1) {
-    next = roundsPlayed - prior - 1;
-  }
-
-  return {
-    roundsPlayed: roundsPlayed + 1,
-    seq: _.concat(seq, [next]),
-    startingNumbers,
-  };
-}
-
-const log = makeSideLogger("day15.log");
+// const log = makeSideLogger("day15.log");
 
 export function part1(input: number[], rounds = 2020): number {
-  let game = {
-    roundsPlayed: 0,
-    seq: [],
-    startingNumbers: input,
-  } as Game;
-  const start = process.hrtime.bigint();
-  let lastLog = 0;
-  while (game.roundsPlayed !== rounds) {
-    const deltaSeconds = Number(process.hrtime.bigint() - start) / 1e9;
-    if (deltaSeconds - lastLog > 1) {
-      lastLog = deltaSeconds;
-      const rate = game.roundsPlayed / deltaSeconds;
-      log.clear();
-      log.log(`ETA: ${(rounds - game.roundsPlayed) / rate} s`);
+  const history = _.reduce(
+    input,
+    (history, val, round) => {
+      history.set(val, round);
+      return history;
+    },
+    new Map<number, number>()
+  );
+  let next = 0;
+
+  // const start = process.hrtime.bigint();
+  // let lastLog = 0;
+  for (let i = input.length; i < rounds - 1; ++i) {
+    // const deltaSeconds = Number(process.hrtime.bigint() - start) / 1e9;
+    // if (deltaSeconds - lastLog > 1) {
+    //   lastLog = deltaSeconds;
+    //   log.clear();
+    //   const percent = (i / rounds) * 100;
+    //   log.log(`${percent.toFixed(1)} %; ${deltaSeconds.toFixed(3)} s`);
+    // }
+
+    const current = next;
+    const lastSeen = history.get(current);
+    next = 0;
+    if (lastSeen != null) {
+      next = i - lastSeen;
     }
-    game = playRound(game);
+    history.set(current, i);
   }
-  return _.last(game.seq) || NaN;
+
+  return next;
 }
 
 export function part2(input: number[]): number {
