@@ -39,9 +39,16 @@ export function part1(input: number[], rounds = 2020): number {
     seq: [],
     startingNumbers: input,
   } as Game;
+  const start = process.hrtime.bigint();
+  let lastLog = 0;
   while (game.roundsPlayed !== rounds) {
-    log.clear();
-    log.log(`${game.roundsPlayed}`);
+    const deltaSeconds = Number(process.hrtime.bigint() - start) / 1e9;
+    if (deltaSeconds - lastLog > 1) {
+      lastLog = deltaSeconds;
+      const rate = game.roundsPlayed / deltaSeconds;
+      log.clear();
+      log.log(`ETA: ${(rounds - game.roundsPlayed) / rate} s`);
+    }
     game = playRound(game);
   }
   return _.last(game.seq) || NaN;
