@@ -7,10 +7,10 @@ export function part1(input: number[], rounds = 2020): number {
   const history = _.reduce(
     input,
     (history, val, round) => {
-      history.set(val, round);
+      history[val] = round;
       return history;
     },
-    new Map<number, number>()
+    new Array<number>(rounds)
   );
   let next = 0;
 
@@ -26,12 +26,12 @@ export function part1(input: number[], rounds = 2020): number {
     // }
 
     const current = next;
-    const lastSeen = history.get(current);
+    const lastSeen = history[current];
     next = 0;
     if (lastSeen != null) {
       next = i - lastSeen;
     }
-    history.set(current, i);
+    history[current] = i;
   }
 
   return next;
