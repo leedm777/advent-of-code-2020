@@ -137,22 +137,20 @@ export function processOfElimination({
         });
     });
   });
-  return _.mapValues(candidates, _.first);
+  return _.mapValues(candidates, ([idx]) => idx);
 }
 
 export function part2(input: string[]): number {
   log.clear();
   const tickets = parseTickets(input);
 
-  tickets.nearbyTickets = _(tickets.nearbyTickets)
-    .filter((ticket) =>
-      _.every(ticket, (val) => _.some(tickets.fields, (f) => isValid(f, val)))
-    )
-    .value();
+  tickets.nearbyTickets = _.filter(tickets.nearbyTickets, (ticket) =>
+    _.every(ticket, (val) => _.some(tickets.fields, (f) => isValid(f, val)))
+  );
 
   const fieldIndexes = processOfElimination(tickets);
   return _(fieldIndexes)
     .pickBy((v, field) => _.startsWith(field, "departure"))
-    .map((idx) => tickets.yourTicket[idx])
-    .reduce(_.multiply);
+    .map((idx) => (idx == null ? NaN : tickets.yourTicket[idx]))
+    .reduce(_.multiply, 1);
 }
