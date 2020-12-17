@@ -70,35 +70,19 @@ export function renderLife(board: Set<string>): string[][] {
 }
 
 function countNeighbors(board: Set<string>, [x, y, z]: Coord): number {
-  return (
-    board.has(`${x - 1},${y - 1},${z - 1}`) +
-    board.has(`${x},${y - 1},${z - 1}`) +
-    board.has(`${x + 1},${y - 1},${z - 1}`) +
-    board.has(`${x - 1},${y},${z - 1}`) +
-    board.has(`${x},${y},${z - 1}`) +
-    board.has(`${x + 1},${y},${z - 1}`) +
-    board.has(`${x - 1},${y + 1},${z - 1}`) +
-    board.has(`${x},${y + 1},${z - 1}`) +
-    board.has(`${x + 1},${y + 1},${z - 1}`) +
-    board.has(`${x - 1},${y - 1},${z}`) +
-    board.has(`${x},${y - 1},${z}`) +
-    board.has(`${x + 1},${y - 1},${z}`) +
-    board.has(`${x - 1},${y},${z}`) +
-    // board.has(`${x    },${y    },${z}`) +
-    board.has(`${x + 1},${y},${z}`) +
-    board.has(`${x - 1},${y + 1},${z}`) +
-    board.has(`${x},${y + 1},${z}`) +
-    board.has(`${x + 1},${y + 1},${z}`) +
-    board.has(`${x - 1},${y - 1},${z + 1}`) +
-    board.has(`${x},${y - 1},${z + 1}`) +
-    board.has(`${x + 1},${y - 1},${z + 1}`) +
-    board.has(`${x - 1},${y},${z + 1}`) +
-    board.has(`${x},${y},${z + 1}`) +
-    board.has(`${x + 1},${y},${z + 1}`) +
-    board.has(`${x - 1},${y + 1},${z + 1}`) +
-    board.has(`${x},${y + 1},${z + 1}`) +
-    board.has(`${x + 1},${y + 1},${z + 1}`)
-  );
+  let count = 0;
+  for (let dz = -1; dz <= 1; ++dz) {
+    for (let dy = -1; dy <= 1; ++dy) {
+      for (let dx = -1; dx <= 1; ++dx) {
+        if (!_.isEqual([dx, dy, dz], [0, 0, 0])) {
+          if (board.has(`${x + dx},${y + dy},${z + dz}`)) {
+            ++count;
+          }
+        }
+      }
+    }
+  }
+  return count;
 }
 
 export function iterateLife(board: Set<string>): Set<string> {
