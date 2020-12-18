@@ -1,5 +1,14 @@
 import _ from "lodash";
 
+interface UglyPriorState {
+  val: number;
+  op: string | null;
+}
+
+interface UglyState extends UglyPriorState {
+  stack: UglyPriorState[];
+}
+
 export function compute(input: string): number {
   const tokens: null | string[] = input.match(/(\d+)|([+*])|([()])/g);
 
@@ -9,7 +18,7 @@ export function compute(input: string): number {
 
   const { val } = _.reduce(
     tokens,
-    ({ val, op, stack }, token) => {
+    ({ val, op, stack }: UglyState, token: string): UglyState => {
       switch (token) {
         case "(":
           return {
@@ -55,17 +64,15 @@ export function compute(input: string): number {
               op: null,
               stack,
             };
-          } else {
-            throw new Error(`Unknown operator ${op}`);
           }
-          break;
+          throw new Error(`Unknown operator ${op}`);
       }
     },
     {
       val: 0,
       op: "+",
-      stack: [] as { val: number; op: string }[],
-    }
+      stack: [],
+    } as UglyState
   );
   return val;
 }
