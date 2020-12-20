@@ -77,16 +77,16 @@ export function parseTile([idLine, ...grid]: string[]): Tile {
     codes.push(c);
     c = rotate(c);
   }
-  c = flipBoth(code);
-  for (let i = 0; i < 4; ++i) {
-    codes.push(c);
-    c = rotate(c);
-  }
+  // c = flipBoth(code);
+  // for (let i = 0; i < 4; ++i) {
+  //   codes.push(c);
+  //   c = rotate(c);
+  // }
 
   return {
     id,
     grid,
-    codes,
+    codes: _.uniqBy(codes, _.join),
   };
 }
 
