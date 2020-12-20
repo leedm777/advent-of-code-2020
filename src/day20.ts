@@ -2,7 +2,7 @@ import _ from "lodash";
 import { sscanf } from "scanf";
 import { makeSideLogger } from "./aoc";
 
-const log = makeSideLogger("day20.log", false);
+const log = makeSideLogger("day20.log", true);
 
 type Code = [number, number, number, number];
 
@@ -137,10 +137,20 @@ function tileFits(
   return candidates;
 }
 
-function computeNextPosition(
+export function computeNextPosition(
   [y, x]: [number, number],
   length: number
 ): [number, number] {
+  if (y < x) {
+    return [y + 1, x];
+  }
+
+  if (x > 0) {
+    return [y, x - 1];
+  }
+
+  return [0, y + 1];
+
   // TODO: Maximize neighbors to eliminate branches sooner
   if ((x + 1) % length === 0) {
     return [y + 1, 0];
@@ -148,42 +158,54 @@ function computeNextPosition(
   return [y, x + 1];
 }
 
+let totalCandidates = 0;
+
 function play(turn: Turn): Turn | null {
-  log.log(JSON.stringify(turn.nextPosition));
+  // log.log(JSON.stringify(turn.nextPosition));
   if (_.isEmpty(turn.remainingTiles)) {
     return turn;
   }
 
   for (const tile of turn.remainingTiles) {
-    log.log(`tile ${tile.id}`);
+    // log.log(`tile ${tile.id}`);
     const candidates = tileFits(
       turn.currentPlacements,
       tile,
       turn.nextPosition
     );
-    log.log(`  candidates ${_.size(candidates)}`);
+    // log.log(`  candidates ${_.size(candidates)}`);
 
-    for (const candidate of candidates) {
-      const nextTiles = [...turn.currentPlacements];
-      nextTiles[turn.nextPosition[0]] = [...nextTiles[turn.nextPosition[0]]];
-      _.set(nextTiles, turn.nextPosition, {
-        id: tile.id,
-        code: candidate,
-      } as Placement);
+    totalCandidates += _.size(candidates);
+    log.log(`${JSON.stringify(turn.nextPosition)}: ${totalCandidates}`);
 
-      const nextTurn = play({
-        ...turn,
-        nextPosition: computeNextPosition(turn.nextPosition, turn.lengthSides),
-        remainingTiles: _.filter(
-          turn.remainingTiles,
-          ({ id }) => id !== tile.id
-        ),
-        currentPlacements: nextTiles,
-      });
+    try {
+      for (const candidate of candidates) {
+        const nextTiles = [...turn.currentPlacements];
+        nextTiles[turn.nextPosition[0]] = [...nextTiles[turn.nextPosition[0]]];
+        _.set(nextTiles, turn.nextPosition, {
+          id: tile.id,
+          code: candidate,
+        } as Placement);
 
-      if (nextTurn) {
-        return nextTurn;
+        const nextTurn = play({
+          ...turn,
+          nextPosition: computeNextPosition(
+            turn.nextPosition,
+            turn.lengthSides
+          ),
+          remainingTiles: _.filter(
+            turn.remainingTiles,
+            ({ id }) => id !== tile.id
+          ),
+          currentPlacements: nextTiles,
+        });
+
+        if (nextTurn) {
+          return nextTurn;
+        }
       }
+    } finally {
+      totalCandidates -= _.size(candidates);
     }
   }
 

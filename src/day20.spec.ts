@@ -1,4 +1,10 @@
-import { encodeSide, part1, part2, reverseBits } from "./day20";
+import {
+  computeNextPosition,
+  encodeSide,
+  part1,
+  part2,
+  reverseBits,
+} from "./day20";
 import { readFile, splitLines } from "./aoc";
 
 const puzzleInput = splitLines(readFile("./src/day20.txt"));
@@ -133,6 +139,44 @@ describe("day20", () => {
       [512, 1],
     ])("%d -> %d", (n, expected) => {
       const actual = reverseBits(n);
+      expect(actual).toStrictEqual(expected);
+    });
+  });
+
+  describe("computeNextPosition", () => {
+    it.each([
+      /*
+        0  1  4   9  16
+        3  2  5  10   .
+        8  7  6  11   .
+       15 14 13  12   .
+       */
+      [
+        [0, 0],
+        [0, 1],
+      ],
+      [
+        [0, 1],
+        [1, 1],
+      ],
+      [
+        [1, 1],
+        [1, 0],
+      ],
+      [
+        [1, 0],
+        [0, 2],
+      ],
+      [
+        [2, 2],
+        [2, 1],
+      ],
+      [
+        [2, 0],
+        [0, 3],
+      ],
+    ])("%s -> %s", (pos: [number, number], expected: [number, number]) => {
+      const actual = computeNextPosition(pos, 5);
       expect(actual).toStrictEqual(expected);
     });
   });
