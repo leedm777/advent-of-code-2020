@@ -6,10 +6,16 @@ const log = makeSideLogger("day20.log", true);
 
 type Code = [number, number, number, number];
 
+interface Orientation {
+  flipped: "none" | "vertically" | "horizontally";
+  rotation: number;
+  code: Code;
+}
+
 interface Tile {
   id: number;
   grid: string[];
-  codes: Code[];
+  orientations: Orientation[];
 }
 
 export function encodeSide(side: string): number {
@@ -47,10 +53,6 @@ function flipHorizontally([top, right, bottom, left]: Code): Code {
   return [reverseBits(top), left, reverseBits(bottom), right];
 }
 
-function flipBoth(code: Code): Code {
-  return flipHorizontally(flipVertically(code));
-}
-
 export function parseTile([idLine, ...grid]: string[]): Tile {
   // TODO: sscanf types are wrong
   const id = (sscanf(idLine, "Tile %d:") as unknown) as number;
@@ -61,38 +63,36 @@ export function parseTile([idLine, ...grid]: string[]): Tile {
   const right = encodeSide(_(grid).map(_.last).join(""));
 
   const code: Code = [top, right, bottom, left];
-  const codes: Code[] = [];
+  const orientations: Orientation[] = [];
   let c = code;
   for (let i = 0; i < 4; ++i) {
-    codes.push(c);
+    orientations.push({
+      code: c,
+      rotation: i,
+      flipped: "none",
+    });
     c = rotate(c);
   }
   c = flipVertically(code);
   for (let i = 0; i < 4; ++i) {
-    codes.push(c);
+    orientations.push({
+      code: c,
+      rotation: i,
+      flipped: "vertically",
+    });
     c = rotate(c);
   }
-  c = flipHorizontally(code);
-  for (let i = 0; i < 4; ++i) {
-    codes.push(c);
-    c = rotate(c);
-  }
-  // c = flipBoth(code);
-  // for (let i = 0; i < 4; ++i) {
-  //   codes.push(c);
-  //   c = rotate(c);
-  // }
 
   return {
     id,
     grid,
-    codes: _.uniqBy(codes, _.join),
+    orientations,
   };
 }
 
 interface Placement {
   id: number;
-  code: Code;
+  orientation: Orientation;
 }
 
 interface Turn {
@@ -106,32 +106,35 @@ function tileFits(
   currentTiles: Placement[][],
   tile: Tile,
   [y, x]: [number, number]
-): Code[] {
-  let candidates = tile.codes;
+): Orientation[] {
+  let candidates = tile.orientations;
   // compare the edges with the existing tiles
   const top = _.get(currentTiles, [y - 1, x]);
   if (top) {
-    candidates = _.filter(candidates, (code) => code[TOP] === top.code[BOTTOM]);
+    candidates = _.filter(
+      candidates,
+      (c) => c.code[TOP] === top.orientation.code[BOTTOM]
+    );
   }
   const right = _.get(currentTiles, [y, x + 1]);
   if (right) {
     candidates = _.filter(
       candidates,
-      (code) => code[RIGHT] === right.code[LEFT]
+      (c) => c.code[RIGHT] === right.orientation.code[LEFT]
     );
   }
   const bottom = _.get(currentTiles, [y + 1, x]);
   if (bottom) {
     candidates = _.filter(
       candidates,
-      (code) => code[BOTTOM] === bottom.code[TOP]
+      (c) => c.code[BOTTOM] === bottom.orientation.code[TOP]
     );
   }
   const left = _.get(currentTiles, [y, x - 1]);
   if (left) {
     candidates = _.filter(
       candidates,
-      (code) => code[LEFT] === left.code[RIGHT]
+      (c) => c.code[LEFT] === left.orientation.code[RIGHT]
     );
   }
   return candidates;
@@ -184,7 +187,7 @@ function play(turn: Turn): Turn | null {
         nextTiles[turn.nextPosition[0]] = [...nextTiles[turn.nextPosition[0]]];
         _.set(nextTiles, turn.nextPosition, {
           id: tile.id,
-          code: candidate,
+          orientation: candidate,
         } as Placement);
 
         const nextTurn = play({
