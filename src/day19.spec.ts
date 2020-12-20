@@ -6,6 +6,9 @@ const puzzleInput = splitLines(readFile("./src/day19.txt"));
 describe("day19", () => {
   describe("part 1", () => {
     it.each([
+      [["0: 1 2", '1: "a"', "2: 1 3 | 3 1", '3: "b"', "", "aab"], 1],
+      [["0: 1 2", '1: "a"', "2: 1 3 | 3 1", '3: "b"', "", "aba"], 1],
+      [["0: 1 2", '1: "a"', "2: 1 3 | 3 1", '3: "b"', "", "abb"], 0],
       [
         [
           "0: 4 1 5",
@@ -31,9 +34,75 @@ describe("day19", () => {
   });
 
   describe("part 2", () => {
+    const rules = [
+      "42: 9 14 | 10 1",
+      "9: 14 27 | 1 26",
+      "10: 23 14 | 28 1",
+      '1: "a"',
+      "11: 42 31",
+      "5: 1 14 | 15 1",
+      "19: 14 1 | 14 14",
+      "12: 24 14 | 19 1",
+      "16: 15 1 | 14 14",
+      "31: 14 17 | 1 13",
+      "6: 14 14 | 1 14",
+      "2: 1 24 | 14 4",
+      "0: 8 11",
+      "13: 14 3 | 1 12",
+      "15: 1 | 14",
+      "17: 14 2 | 1 7",
+      "23: 25 1 | 22 14",
+      "28: 16 1",
+      "4: 1 1",
+      "20: 14 14 | 1 15",
+      "3: 5 14 | 16 1",
+      "27: 1 6 | 14 18",
+      '14: "b"',
+      "21: 14 1 | 1 14",
+      "25: 1 1 | 1 14",
+      "22: 14 14",
+      "8: 42",
+      "26: 14 22 | 1 20",
+      "18: 15 15",
+      "7: 14 5 | 1 21",
+      "24: 14 1",
+    ];
     it.each([
-      [[], 0],
-      [puzzleInput, 0],
+      [[...rules, "", "bbabbbbaabaabba"], 1],
+      [[...rules, "", "babbbbaabbbbbabbbbbbaabaaabaaa"], 1], // BROKEN
+      [[...rules, "", "aaabbbbbbaaaabaababaabababbabaaabbababababaaa"], 1],
+      [[...rules, "", "bbbbbbbaaaabbbbaaabbabaaa"], 1], // BROKEN
+      [[...rules, "", "bbbababbbbaaaaaaaabbababaaababaabab"], 1], // BROKEN
+      [[...rules, "", "ababaaaaaabaaab"], 1],
+      [[...rules, "", "ababaaaaabbbaba"], 1],
+      [[...rules, "", "baabbaaaabbaaaababbaababb"], 1],
+      [[...rules, "", "abbbbabbbbaaaababbbbbbaaaababb"], 1], // BROKEN
+      [[...rules, "", "aaaaabbaabaaaaababaa"], 1], // BROKEN
+      [[...rules, "", "aaaabbaabbaaaaaaabbbabbbaaabbaabaaa"], 1],
+      [[...rules, "", "aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba"], 1],
+      [
+        [
+          ...rules,
+          "",
+          "abbbbbabbbaaaababbaabbbbabababbbabbbbbbabaaaa",
+          "bbabbbbaabaabba",
+          "babbbbaabbbbbabbbbbbaabaaabaaa",
+          "aaabbbbbbaaaabaababaabababbabaaabbababababaaa",
+          "bbbbbbbaaaabbbbaaabbabaaa",
+          "bbbababbbbaaaaaaaabbababaaababaabab",
+          "ababaaaaaabaaab",
+          "ababaaaaabbbaba",
+          "baabbaaaabbaaaababbaababb",
+          "abbbbabbbbaaaababbbbbbaaaababb",
+          "aaaaabbaabaaaaababaa",
+          "aaaabbaaaabbaaa",
+          "aaaabbaabbaaaaaaabbbabbbaaabbaabaaa",
+          "babaaabbbaaabaababbaabababaaab",
+          "aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba",
+        ],
+        12,
+      ],
+      [puzzleInput, 381],
     ])("input %#", (input, expected) => {
       const actual = part2(input);
       expect(actual).toStrictEqual(expected);

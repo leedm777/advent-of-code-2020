@@ -1,11 +1,13 @@
 import _ from "lodash";
+import { makeSideLogger } from "./aoc";
 
-type Match = { matches: boolean; rem?: string };
+const log = makeSideLogger("day19.log");
+log.clear();
 
 interface Rule {
   id: number;
 
-  match(msg: string): Match;
+  match(msg: string): string[];
 }
 
 function parseRules(rulesStrs: string[]): Rule[] {
@@ -19,18 +21,13 @@ function parseRules(rulesStrs: string[]): Rule[] {
           const letter = hasLetter[1];
           return {
             id,
-            match(str: string): Match {
+            match(str: string): string[] {
               if (_.head(str) === letter) {
-                return {
-                  matches: true,
-                  rem: _.tail(str).join(""),
-                };
+                log.log(`  MATCH ${id} (${letter}) (${str})`);
+                return [_.tail(str).join("")];
               }
 
-              return {
-                matches: false,
-                rem: str,
-              };
+              return [];
             },
           };
         }
@@ -47,31 +44,18 @@ function parseRules(rulesStrs: string[]): Rule[] {
 
         return {
           id,
-          match(str: string): Match {
-            for (const branch of children) {
-              const res = _.reduce(
+          match(str: string): string[] {
+            log.log(`TESTING ${id} ${JSON.stringify(children)} (${str}) `);
+            return _.flatMap(children, (branch): string[] => {
+              log.log(`  branch ${JSON.stringify(branch)}`);
+              return _.reduce(
                 branch,
-                ({ matches, rem }: Match, ruleId) => {
-                  if (!matches || _.isNil(rem)) {
-                    return {
-                      matches: false,
-                    };
-                  }
-
-                  return rules[ruleId].match(rem);
+                (matches: string[], ruleId) => {
+                  return _.flatMap(matches, (rem) => rules[ruleId].match(rem));
                 },
-                {
-                  matches: true,
-                  rem: str,
-                }
+                [str]
               );
-              if (res.matches) {
-                return res;
-              }
-            }
-            return {
-              matches: false,
-            };
+            });
           },
         };
       }
@@ -95,12 +79,40 @@ export function part1(input: string[]): number {
 
   return _(msgs)
     .filter((msg) => {
-      const { matches, rem } = rules[0].match(msg);
-      return matches && rem === "";
+      const matches = rules[0].match(msg);
+      log.log(`matches => ${JSON.stringify(matches)}`);
+      return _.includes(matches, "");
     })
     .size();
 }
 
 export function part2(input: string[]): number {
-  return 0;
+  const rulesStrs = _(input)
+    .takeWhile((s) => s !== "")
+    .map((s) => {
+      switch (s) {
+        case "8: 42":
+          return "8: 42 | 42 8";
+        case "11: 42 31":
+          return "11: 42 31 | 42 11 31";
+        default:
+          return s;
+      }
+    })
+    .value();
+
+  const msgs = _(input)
+    .dropWhile((s) => s !== "")
+    .drop()
+    .value();
+
+  const rules = parseRules(rulesStrs);
+
+  return _(msgs)
+    .filter((msg) => {
+      const matches = rules[0].match(msg);
+      log.log(`matches => ${JSON.stringify(matches)}`);
+      return _.includes(matches, "");
+    })
+    .size();
 }
