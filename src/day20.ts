@@ -22,7 +22,7 @@ export function encodeSide(side: string): number {
 
 // rotates clockwise
 function rotate([top, right, bottom, left]: Code): Code {
-  return [reverseBits(left), top, right, reverseBits(bottom)];
+  return [reverseBits(left), top, reverseBits(right), bottom];
 }
 
 export function reverseBits(n: number): number {
@@ -51,7 +51,7 @@ function flipBoth(code: Code): Code {
   return flipHorizontally(flipVertically(code));
 }
 
-function parseTile([idLine, ...grid]: string[]): Tile {
+export function parseTile([idLine, ...grid]: string[]): Tile {
   // TODO: sscanf types are wrong
   const id = (sscanf(idLine, "Tile %d:") as unknown) as number;
 
@@ -142,6 +142,9 @@ export function computeNextPosition(
   length: number
 ): [number, number] {
   if (y < x) {
+    if (y >= length) {
+      throw new Error(`Invalid next position for [${y},${x}]`);
+    }
     return [y + 1, x];
   }
 
@@ -149,13 +152,10 @@ export function computeNextPosition(
     return [y, x - 1];
   }
 
-  return [0, y + 1];
-
-  // TODO: Maximize neighbors to eliminate branches sooner
-  if ((x + 1) % length === 0) {
-    return [y + 1, 0];
+  if (y >= length) {
+    throw new Error(`Invalid next position for [${y},${x}]`);
   }
-  return [y, x + 1];
+  return [0, y + 1];
 }
 
 let totalCandidates = 0;

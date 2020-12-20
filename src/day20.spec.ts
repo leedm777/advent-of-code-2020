@@ -1,6 +1,7 @@
 import {
   computeNextPosition,
   encodeSide,
+  parseTile,
   part1,
   part2,
   reverseBits,
@@ -143,6 +144,44 @@ describe("day20", () => {
     });
   });
 
+  describe.skip("parseTile", () => {
+    it.each([
+      [
+        [
+          "Tile 0:",
+          "........#.",
+          "..........",
+          "..........",
+          "..........",
+          "..........",
+          "..........",
+          "..........",
+          "..........",
+          "..........",
+          "..........",
+        ],
+        {
+          id: 0,
+          grid: [
+            "........#.",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+          ],
+        },
+      ],
+    ])("case %#", (grid, expected) => {
+      const actual = parseTile(grid);
+      expect(actual).toStrictEqual(expected);
+    });
+  });
+
   describe("computeNextPosition", () => {
     it.each([
       /*
@@ -175,9 +214,9 @@ describe("day20", () => {
         [2, 0],
         [0, 3],
       ],
-    ])("%s -> %s", (pos: [number, number], expected: [number, number]) => {
-      const actual = computeNextPosition(pos, 5);
-      expect(actual).toStrictEqual(expected);
+    ])("%s -> %s", (pos: number[], expected: number[]) => {
+      const actual = computeNextPosition(pos as [number, number], 5);
+      expect(actual).toStrictEqual(expected as [number, number]);
     });
   });
 
