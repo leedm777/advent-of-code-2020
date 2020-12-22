@@ -80,10 +80,11 @@ export function part2(input: string[]): string {
   let allergenList: { [allergen: string]: string } = {};
 
   while (!_.isEmpty(allergenCandidates)) {
-    const known = _(allergenCandidates)
+    const known = (_(allergenCandidates)
       .pickBy((i) => _.size(i) === 1)
       .mapValues(([v]: [string]) => v)
-      .value();
+      // TODO: lodash chain map types are wrong
+      .value() as unknown) as { [p: string]: string };
 
     if (_.isEmpty(known)) {
       console.error("Nope");
@@ -95,7 +96,7 @@ export function part2(input: string[]): string {
     allergenCandidates = _(allergenCandidates)
       .mapValues((ingredients) => _.difference(ingredients, _.values(known)))
       .pickBy((ingredients) => !_.isEmpty(ingredients))
-      .value();
+      .value() as AllergenCandidates;
   }
 
   return _(allergenList)
