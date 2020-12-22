@@ -30,7 +30,7 @@ describe("day22", () => {
         ],
         291,
       ],
-      [puzzleInput, 0], // not 31454
+      [puzzleInput, 35070],
     ])("input %#", (input, expected) => {
       const actual = part2(input);
       expect(actual).toStrictEqual(expected);
