@@ -1,7 +1,6 @@
 import {
   computeNextPosition,
   encodeSide,
-  parseTile,
   part1,
   part2,
   reverseBits,
@@ -194,8 +193,8 @@ describe("day20", () => {
 
   describe("part 2", () => {
     it.each([
-      [[], 0],
-      [puzzleInput, 0],
+      [example, 273],
+      [puzzleInput, 2304],
     ])("input %#", (input, expected) => {
       const actual = part2(input);
       expect(actual).toStrictEqual(expected);
