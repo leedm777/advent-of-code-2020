@@ -18,6 +18,18 @@ interface Tile {
   orientations: Orientation[];
 }
 
+interface Placement {
+  id: number;
+  orientation: Orientation;
+}
+
+interface Turn {
+  nextPosition: [number, number];
+  lengthSides: number;
+  remainingTiles: Tile[];
+  currentPlacements: Placement[][];
+}
+
 export function encodeSide(side: string): number {
   return _.chain(side)
     .replace(/\./g, "0")
@@ -88,18 +100,6 @@ export function parseTile([idLine, ...grid]: string[]): Tile {
     grid,
     orientations,
   };
-}
-
-interface Placement {
-  id: number;
-  orientation: Orientation;
-}
-
-interface Turn {
-  nextPosition: [number, number];
-  lengthSides: number;
-  remainingTiles: Tile[];
-  currentPlacements: Placement[][];
 }
 
 function tileFits(
@@ -215,8 +215,9 @@ function play(turn: Turn): Turn | null {
   return null;
 }
 
-export function part1(input: string[]): number {
+function solve(input: string[]): Turn | null {
   const tiles = _(input)
+    // TODO: need helper to chunk by blank lines
     .chunk(12)
     .map((c) => _.takeWhile(c, _.negate(_.isEmpty)))
     .map(parseTile)
@@ -233,16 +234,22 @@ export function part1(input: string[]): number {
     );
   }
 
-  const finalTurn = play({
+  return play({
     nextPosition: [0, 0],
     lengthSides,
     remainingTiles: tiles,
     currentPlacements,
   });
+}
+
+export function part1(input: string[]): number {
+  const finalTurn = solve(input);
 
   if (!finalTurn) {
     return NaN;
   }
+
+  const { lengthSides } = finalTurn;
 
   return (
     finalTurn.currentPlacements[0][0].id *
@@ -253,5 +260,16 @@ export function part1(input: string[]): number {
 }
 
 export function part2(input: string[]): number {
+  const finalTurn = solve(input);
+
+  if (!finalTurn) {
+    return NaN;
+  }
+
+  const { currentPlacements } = finalTurn;
+  for (let y = 0; y < currentPlacements.length; ++y) {
+    for (let x = 0; x < currentPlacements[y].length; ++x) {}
+  }
+
   return 0;
 }
