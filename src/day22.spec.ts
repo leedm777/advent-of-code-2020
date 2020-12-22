@@ -23,8 +23,14 @@ describe("day22", () => {
 
   describe("part 2", () => {
     it.each([
-      [[], 0],
-      [puzzleInput, 0],
+      [
+        [
+          ["Player 1:", "9", "2", "6", "3", "1"],
+          ["Player 2:", "5", "8", "4", "7", "10"],
+        ],
+        291,
+      ],
+      [puzzleInput, 0], // not 31454
     ])("input %#", (input, expected) => {
       const actual = part2(input);
       expect(actual).toStrictEqual(expected);
