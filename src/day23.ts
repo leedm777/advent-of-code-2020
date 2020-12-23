@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { makeSideLogger } from "./aoc";
 
-const log = makeSideLogger("day23.log");
+const log = makeSideLogger("day23.log", true);
 
 export function parseCups(s: string): number[] {
   return _(s)
@@ -58,9 +58,12 @@ interface Cup {
 interface CupGame {
   cups: Map<number, Cup>;
   current: Cup;
+  numCups: number;
 }
 
-export function playCupGameFast({ cups, current }: CupGame): CupGame {
+const numMoves = 10000000;
+
+export function playCupGameFast({ cups, current, numCups }: CupGame): CupGame {
   // The crab picks up the three cups that are immediately clockwise of the
   // current cup. They are removed from the circle; cup spacing is adjusted as
   // necessary to maintain the circle.
@@ -74,32 +77,54 @@ export function playCupGameFast({ cups, current }: CupGame): CupGame {
   // that wasn't just picked up. If at any point in this process the value goes
   // below the lowest value on any cup's label, it wraps around to the highest
   // value on any cup's label instead.
-  // TODO...
+  let destination = current.label - 1;
+  if (destination < 1) {
+    destination = numCups;
+  }
+  while (
+    current.label === destination ||
+    cup1.label === destination ||
+    cup2.label === destination ||
+    cup3.label === destination
+  ) {
+    --destination;
+    if (destination < 1) {
+      destination = numCups;
+    }
+  }
+  const destinationCup = cups.get(destination) as Cup;
+  if (!destinationCup) {
+    throw new Error(
+      `Could not find destination ${destination} for ${current.label}`
+    );
+  }
 
   // The crab places the cups it just picked up so that they are immediately
   // clockwise of the destination cup. They keep the same order as when they
   // were picked up.
-  // TODO...
+  current.next = cup3.next;
+  cup3.next = destinationCup.next;
+  destinationCup.next = cup1;
 
   return {
     cups,
+    numCups,
     current: current.next as Cup,
   };
 }
 
-export function part2(input: string): number {
-  const numCups = 1000000;
-  const numMoves = 10000000;
+export function parseCupGame(input: string, numCups = 1000000): CupGame {
   let cupsArray = parseCups(input);
   cupsArray = [
     ...cupsArray,
     ..._.range((_.max(cupsArray) as number) + 1, numCups + 1),
   ];
 
-  const cups = new Map<number, Cup>();
   const firstCup: Cup = {
-    label: cupsArray[i],
+    label: cupsArray[0],
   };
+  const cups = new Map<number, Cup>();
+  cups.set(firstCup.label, firstCup);
   let priorCup = firstCup;
   for (let i = 1; i < cupsArray.length; ++i) {
     const cup = {
@@ -107,21 +132,40 @@ export function part2(input: string): number {
     };
     priorCup.next = cup;
     priorCup = cup;
-    cups.set(i, cup);
+    cups.set(cup.label, cup);
   }
   priorCup.next = firstCup;
+  return { cups, numCups, current: firstCup };
+}
+
+export function renderCupGame(game: CupGame): string {
+  let render = `${game.current.label}`;
+  for (
+    let c = game.current.next as Cup;
+    c !== game.current;
+    c = c.next as Cup
+  ) {
+    render = `${render}${c.label}`;
+  }
+  return render;
+}
+
+export function part2(input: string): number {
+  let game = parseCupGame(input);
 
   let lastLogged = process.hrtime.bigint();
   for (let i = 0; i < numMoves; ++i) {
-    if (process.hrtime.bigint() - lastLogged > 1000000000n) {
+    if (process.hrtime.bigint() - lastLogged > 100000000n) {
       log.clear();
       log.log(`${i}`);
       lastLogged = process.hrtime.bigint();
     }
-    cupsArray = playCupGame(cupsArray);
+    game = playCupGameFast(game);
   }
 
-  const idx = _.findIndex(cupsArray, (x) => x === 1);
+  const cup1 = game.cups.get(1) as Cup;
+  const cup2 = cup1.next as Cup;
+  const cup3 = cup2.next as Cup;
 
-  return cupsArray[idx + 1] * cupsArray[idx + 2];
+  return cup2.label * cup3.label;
 }
