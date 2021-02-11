@@ -1,4 +1,4 @@
-import { part1, part2 } from "./day25";
+import { part1 } from "./day25";
 import { readFile, splitLines } from "./aoc";
 
 const puzzleInput = splitLines(readFile("./src/day25.txt"));
@@ -10,16 +10,6 @@ describe("day25", () => {
       [puzzleInput, 15217943],
     ])("input %#", (input, expected) => {
       const actual = part1(input as [string, string]);
-      expect(actual).toStrictEqual(expected);
-    });
-  });
-
-  describe("part 2", () => {
-    it.each([
-      [[], 0],
-      [puzzleInput, 0],
-    ])("input %#", (input, expected) => {
-      const actual = part2(input);
       expect(actual).toStrictEqual(expected);
     });
   });

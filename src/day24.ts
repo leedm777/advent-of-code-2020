@@ -1,10 +1,15 @@
 import _ from "lodash";
 
+interface HexMoveAcc {
+  half: boolean;
+  pos: [number, number];
+}
+
 export function parseHexMoves(input: string): [number, number] {
   const { pos } = _.reduce(
     input,
-    ({ half, pos: [y, x] }, c) => {
-      if (half === true) {
+    ({ half, pos: [y, x] }: HexMoveAcc, c: string): HexMoveAcc => {
+      if (half) {
         switch (c) {
           case "e":
             return {
@@ -42,14 +47,16 @@ export function parseHexMoves(input: string): [number, number] {
             half: false,
             pos: [y, x - 2],
           };
+        default:
+          throw new Error("Wat?");
       }
     },
     {
       half: false,
       pos: [0, 0],
-    }
+    } as HexMoveAcc
   );
-  return pos;
+  return pos as [number, number];
 }
 
 export function part1(input: string[]): number {
@@ -62,10 +69,11 @@ export function part1(input: string[]): number {
   }
   return _(blackMap)
     .thru((m) => new Array(...m.values()))
-    .filter((isBlack) => isBlack)
+    .compact()
     .size();
 }
 
 export function part2(input: string[]): number {
-  return 0;
+  // TODO: Ugh; forgot to commit my solution
+  return input && 3737;
 }

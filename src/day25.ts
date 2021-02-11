@@ -31,6 +31,4 @@ export function part1(handshake: [string, string]): number {
   return encrypt(doorPub, cardLoopSize);
 }
 
-export function part2(input: string[]): number {
-  return 0;
-}
+// There is no part 2
